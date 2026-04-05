@@ -8,7 +8,7 @@ export type R2Config = {
   secretAccessKey: string;
 };
 
-export const DEFAULT_STARTUP_ASSETS_KEY = "bootstrap/startup-assets.json";
+export { DEFAULT_STARTUP_ASSETS_KEY } from "./startupAssets";
 
 export function getR2Config(): R2Config {
   const accessKeyId =

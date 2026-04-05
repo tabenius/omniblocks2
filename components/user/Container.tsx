@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useNode } from "@craftjs/core";
-import { RemSliderField, ColorField, FieldStack } from "@/components/editor/fields";
+import { RemSliderField, BackgroundField, FieldStack } from "@/components/editor/fields";
 
 export type ContainerProps = {
   background?: string;
@@ -33,7 +33,7 @@ export const Container = ({
 
 const ContainerSettings = () => (
   <FieldStack>
-    <ColorField label="Background" propKey="background" />
+    <BackgroundField />
     <RemSliderField label="Padding" propKey="padding" min={0} max={12} step={0.25} fallback={1} />
   </FieldStack>
 );

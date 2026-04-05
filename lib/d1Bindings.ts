@@ -1,20 +1,6 @@
-let cfContextLoader: null | unknown | undefined;
-let warnedOnce = false;
+import { getCloudflareEnv } from "./cfContext";
 
-async function loadContextLoader() {
-  if (cfContextLoader !== undefined) return cfContextLoader;
-  try {
-    const mod = await import("@opennextjs/cloudflare");
-    const fn = typeof mod.getCloudflareContext === "function"
-      ? mod.getCloudflareContext
-      : null;
-    cfContextLoader = fn;
-    return fn;
-  } catch {
-    cfContextLoader = null;
-    return null;
-  }
-}
+let warnedOnce = false;
 
 type D1PreparedStatement = {
   bind: (...values: unknown[]) => D1PreparedStatement;
@@ -29,14 +15,8 @@ export type D1DatabaseLike = {
 
 export async function getD1Database(): Promise<D1DatabaseLike | null> {
   try {
-    const loader = await loadContextLoader();
-    if (typeof loader !== "function") return null;
-    const context = (await (
-      loader as (options: { async: true }) => Promise<unknown>
-    )({ async: true })) as {
-      env?: { DB?: unknown };
-    };
-    const db = context.env?.DB;
+    const env = await getCloudflareEnv();
+    const db = env?.DB;
     if (!db || typeof db !== "object") return null;
     if (!("prepare" in db) || typeof (db as { prepare?: unknown }).prepare !== "function") {
       return null;

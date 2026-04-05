@@ -5,6 +5,7 @@ import {
   TextField,
   BooleanField,
   RemSliderField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -78,6 +79,7 @@ const AudioSettings = () => (
     <BooleanField label="Controls" propKey="controls" />
     <BooleanField label="Autoplay" propKey="autoPlay" />
     <BooleanField label="Loop" propKey="loop" />
+    <BackgroundField />
     <RemSliderField label="Padding" propKey="padding" min={0} max={8} step={0.25} fallback={1} />
     <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={4} step={0.125} fallback={0.5} />
   </FieldStack>

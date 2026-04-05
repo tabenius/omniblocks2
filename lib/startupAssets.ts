@@ -1,4 +1,5 @@
 import type { SerializedNodes } from "@craftjs/core";
+import { isRecord } from "./typeGuards";
 
 export const STARTUP_ASSETS_CACHE_KEY = "omni-startup-assets-cache";
 export const STARTUP_IMAGES_CACHE_KEY = "omni-startup-images-cache";
@@ -30,10 +31,6 @@ export type StartupAssetsPayload = {
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function sanitizeTemplate(value: unknown): StartupTemplate | null {

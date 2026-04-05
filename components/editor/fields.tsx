@@ -97,8 +97,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function formatNumber(value: number): string {
-  const fixed = Number(value.toFixed(4));
-  return Number.isInteger(fixed) ? String(fixed) : String(fixed);
+  return String(Number(value.toFixed(4)));
 }
 
 function formatValue(value: number, unit: ScalarSliderFieldProps["unit"]): string {
@@ -226,6 +225,104 @@ export function ColorField({
         />
       </div>
     </label>
+  );
+}
+
+const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+const BACKGROUND_PRESETS: Array<{ id: string; label: string; value: string; swatch: string }> = [
+  { id: "transparent", label: "None", value: "transparent", swatch: "transparent" },
+  { id: "background", label: "Background", value: "var(--color-background)", swatch: "var(--color-background)" },
+  { id: "surface", label: "Surface", value: "var(--color-surface)", swatch: "var(--color-surface)" },
+  { id: "muted", label: "Muted", value: "var(--color-muted)", swatch: "var(--color-muted)" },
+  { id: "primary", label: "Primary", value: "var(--color-primary)", swatch: "var(--color-primary)" },
+  { id: "secondary", label: "Secondary", value: "var(--color-secondary)", swatch: "var(--color-secondary)" },
+  { id: "accent", label: "Accent", value: "var(--color-accent)", swatch: "var(--color-accent)" },
+];
+
+export function BackgroundField({
+  label = "Background",
+  propKey = "background",
+}: {
+  label?: string;
+  propKey?: string;
+} = {}) {
+  const [value, set] = useProp<string>(propKey);
+  const current = value ?? "";
+  const matchedPreset = BACKGROUND_PRESETS.find((p) => p.value === current);
+  const isCustom = !matchedPreset && current !== "";
+  const customColor = HEX_COLOR_RE.test(current) ? current : "#000000";
+
+  return (
+    <div className={labelCls}>
+      <span className={spanCls}>{label}</span>
+      <div className="grid grid-cols-4 gap-1">
+        {BACKGROUND_PRESETS.map((preset) => {
+          const active = matchedPreset?.id === preset.id;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => set(preset.value)}
+              title={preset.label}
+              className="flex items-center gap-1.5 px-1.5 py-1 text-[10px] rounded border transition-colors"
+              style={{
+                background: active ? "var(--color-primary)" : "var(--color-secondary)",
+                color: active ? "var(--color-primary-foreground)" : "var(--color-muted-foreground)",
+                borderColor: active ? "var(--color-primary)" : "var(--color-border)",
+              }}
+            >
+              <span
+                className="inline-block w-3 h-3 rounded-sm border border-[var(--color-border)]"
+                style={{
+                  background: preset.swatch,
+                  backgroundImage:
+                    preset.id === "transparent"
+                      ? "linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)"
+                      : undefined,
+                  backgroundSize: preset.id === "transparent" ? "6px 6px" : undefined,
+                  backgroundPosition: preset.id === "transparent" ? "0 0, 3px 3px" : undefined,
+                }}
+              />
+              <span className="truncate">{preset.label}</span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => set(isCustom ? current : "#000000")}
+          title="Custom"
+          className="flex items-center gap-1.5 px-1.5 py-1 text-[10px] rounded border transition-colors"
+          style={{
+            background: isCustom ? "var(--color-primary)" : "var(--color-secondary)",
+            color: isCustom ? "var(--color-primary-foreground)" : "var(--color-muted-foreground)",
+            borderColor: isCustom ? "var(--color-primary)" : "var(--color-border)",
+          }}
+        >
+          <span
+            className="inline-block w-3 h-3 rounded-sm border border-[var(--color-border)]"
+            style={{ background: isCustom ? current : "#000000" }}
+          />
+          <span className="truncate">Custom</span>
+        </button>
+      </div>
+      {isCustom ? (
+        <div className="flex gap-2 items-center pt-1">
+          <input
+            type="text"
+            value={current}
+            onChange={(e) => set(e.target.value)}
+            className={inputCls}
+          />
+          <input
+            type="color"
+            value={customColor}
+            onChange={(e) => set(e.target.value)}
+            className="w-8 h-8 border border-[var(--color-border)] rounded cursor-pointer"
+          />
+        </div>
+      ) : null}
+    </div>
   );
 }
 

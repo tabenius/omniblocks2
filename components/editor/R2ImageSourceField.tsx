@@ -61,15 +61,6 @@ function pickErrorMessage(error: unknown, fallback: string): string {
   return msg;
 }
 
-async function blobToDataUrl(blob: Blob): Promise<string> {
-  return await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("Could not create local image URL."));
-    reader.readAsDataURL(blob);
-  });
-}
-
 async function readApiPayload(response: Response, fallbackMessage: string): Promise<ApiPayload> {
   const raw = await response.text();
   const trimmed = raw.trim();
@@ -104,19 +95,36 @@ export const R2ImageSourceField = ({ value, onChange }: R2ImageSourceFieldProps)
   const [uploading, setUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState("");
   const [uploadNotice, setUploadNotice] = React.useState("");
+  const [previewOnlyUrl, setPreviewOnlyUrl] = React.useState("");
 
   const previewCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const previewOnlyUrlRef = React.useRef<string | null>(null);
+  const clearPreviewOnlyUrl = React.useCallback(() => {
+    if (previewOnlyUrlRef.current) {
+      URL.revokeObjectURL(previewOnlyUrlRef.current);
+      previewOnlyUrlRef.current = null;
+    }
+    setPreviewOnlyUrl("");
+  }, []);
 
   React.useEffect(() => {
     if (!selectedFile) {
       setPreviewUrl("");
       setUploadNotice("");
+      clearPreviewOnlyUrl();
       return;
     }
+    clearPreviewOnlyUrl();
     const url = URL.createObjectURL(selectedFile);
     setPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [selectedFile]);
+  }, [clearPreviewOnlyUrl, selectedFile]);
+
+  React.useEffect(() => {
+    return () => {
+      clearPreviewOnlyUrl();
+    };
+  }, [clearPreviewOnlyUrl]);
 
   React.useEffect(() => {
     if (!previewUrl || !previewCanvasRef.current) return;
@@ -196,14 +204,17 @@ export const R2ImageSourceField = ({ value, onChange }: R2ImageSourceFieldProps)
       if (!response.ok || !json?.ok || !json?.item?.url) {
         throw new Error(json?.error || "Upload failed.");
       }
+      clearPreviewOnlyUrl();
       onChange(String(json.item.url));
       setUploadNotice("Uploaded to R2 and applied to block.");
     } catch (error) {
       try {
         if (preparedBlob) {
-          const localUrl = await blobToDataUrl(preparedBlob);
-          onChange(localUrl);
-          setUploadNotice("R2 upload failed. Applied local image in canvas (not persisted to R2).");
+          clearPreviewOnlyUrl();
+          const localPreviewUrl = URL.createObjectURL(preparedBlob);
+          previewOnlyUrlRef.current = localPreviewUrl;
+          setPreviewOnlyUrl(localPreviewUrl);
+          setUploadNotice("R2 upload failed. Showing local preview only (block image is unchanged).");
           setUploadError("");
           return;
         }
@@ -293,6 +304,19 @@ export const R2ImageSourceField = ({ value, onChange }: R2ImageSourceFieldProps)
         ) : null}
         {uploadNotice ? (
           <div className="text-xs text-[var(--color-muted-foreground)]">{uploadNotice}</div>
+        ) : null}
+        {previewOnlyUrl ? (
+          <div className="space-y-1">
+            <div className="text-[11px] text-[var(--color-muted-foreground)] uppercase tracking-wide">
+              Preview Only (Not Saved)
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewOnlyUrl}
+              alt="Local preview only"
+              className="w-full max-h-32 object-contain rounded border border-[var(--color-border)] bg-black"
+            />
+          </div>
         ) : null}
       </div>
 

@@ -2,12 +2,9 @@
 
 import { STORAGE_KEY } from "@/lib/editorStorage";
 import { readSavedDocuments } from "@/lib/documentStore";
+import { isRecord, type JsonRecord } from "@/lib/typeGuards";
 
-export type JsonRecord = Record<string, unknown>;
-
-export function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null;
-}
+export { isRecord, type JsonRecord };
 
 export function parseSerializedNodes(raw: string | null): JsonRecord | null {
   if (!raw) return null;

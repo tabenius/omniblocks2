@@ -6,6 +6,7 @@ import {
   SelectField,
   RemSliderField,
   ColorField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -81,7 +82,7 @@ const FormSettings = () => (
     <RemSliderField label="Padding" propKey="padding" min={0} max={10} step={0.25} fallback={1} />
     <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={0.5} />
     <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={4} step={0.125} fallback={0.5} />
-    <ColorField label="Background" propKey="background" />
+    <BackgroundField />
     <ColorField label="Border color" propKey="borderColor" />
   </FieldStack>
 );

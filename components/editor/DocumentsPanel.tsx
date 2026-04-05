@@ -20,6 +20,10 @@ export const DocumentsPanel = ({ initialName = "" }: DocumentsPanelProps) => {
   const [docs, setDocs] = React.useState(() => readSavedDocuments());
   const [status, setStatus] = React.useState("");
   const slug = slugifyDocumentName(name);
+  const sortedDocs = React.useMemo(
+    () => docs.slice().sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1)),
+    [docs],
+  );
 
   React.useEffect(() => {
     setDocs(readSavedDocuments());
@@ -81,10 +85,7 @@ export const DocumentsPanel = ({ initialName = "" }: DocumentsPanelProps) => {
             No named documents yet.
           </div>
         ) : (
-          docs
-            .slice()
-            .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))
-            .map((doc) => (
+          sortedDocs.map((doc) => (
               <div
                 key={doc.slug}
                 className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2 space-y-1"

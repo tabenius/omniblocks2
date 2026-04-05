@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useNode } from "@craftjs/core";
-import { TextField, RemSliderField, FieldStack } from "@/components/editor/fields";
+import { TextField, RemSliderField, BackgroundField, FieldStack } from "@/components/editor/fields";
 
 export type VideoProps = {
   src?: string;
@@ -132,6 +132,7 @@ const VideoSettings = () => (
   <FieldStack>
     <TextField label="Title" propKey="title" />
     <TextField label="Source URL" propKey="src" />
+    <BackgroundField />
     <RemSliderField label="Padding" propKey="padding" min={0} max={8} step={0.25} fallback={1} />
     <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={4} step={0.125} fallback={0.5} />
   </FieldStack>

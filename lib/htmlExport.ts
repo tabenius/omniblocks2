@@ -1,4 +1,5 @@
 import type { SerializedNode, SerializedNodes } from "@craftjs/core";
+import { isRecord } from "./typeGuards";
 
 type HtmlExportOptions = {
   title?: string;
@@ -59,10 +60,6 @@ const DEFAULT_THEME_VARIABLES: Record<string, string> = {
   "--color-warning": "#d97706",
   "--color-danger": "#dc2626",
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object";
-}
 
 function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;

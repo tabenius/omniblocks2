@@ -6,6 +6,7 @@ import {
   TextAreaField,
   TextField,
   ColorField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -134,7 +135,7 @@ const EventSettings = () => (
     <TextField label="To (optional)" propKey="to" placeholder="2026-06-16" />
     <TextField label="Title" propKey="title" />
     <TextAreaField label="Paragraph" propKey="text" rows={4} />
-    <ColorField label="Background" propKey="background" />
+    <BackgroundField />
     <ColorField label="Border color" propKey="borderColor" />
     <ColorField label="Date panel background" propKey="dateBackground" />
     <ColorField label="Date panel color" propKey="dateColor" />

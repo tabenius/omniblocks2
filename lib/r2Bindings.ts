@@ -1,20 +1,6 @@
-let cfContextLoader: null | unknown | undefined;
-let warnedOnce = false;
+import { getCloudflareEnv } from "./cfContext";
 
-async function loadContextLoader() {
-  if (cfContextLoader !== undefined) return cfContextLoader;
-  try {
-    const mod = await import("@opennextjs/cloudflare");
-    const fn = typeof mod.getCloudflareContext === "function"
-      ? mod.getCloudflareContext
-      : null;
-    cfContextLoader = fn;
-    return fn;
-  } catch {
-    cfContextLoader = null;
-    return null;
-  }
-}
+let warnedOnce = false;
 
 export type R2ObjectLike = {
   key: string;
@@ -54,14 +40,8 @@ export type R2BucketLike = {
 
 export async function getR2Bucket(): Promise<R2BucketLike | null> {
   try {
-    const loader = await loadContextLoader();
-    if (typeof loader !== "function") return null;
-    const context = (await (
-      loader as (options: { async: true }) => Promise<unknown>
-    )({ async: true })) as {
-      env?: { R2_BUCKET?: unknown };
-    };
-    const bucket = context.env?.R2_BUCKET;
+    const env = await getCloudflareEnv();
+    const bucket = env?.R2_BUCKET;
     if (!bucket || typeof bucket !== "object") return null;
     if (!("get" in bucket) || !("put" in bucket) || !("list" in bucket)) return null;
     return bucket as R2BucketLike;

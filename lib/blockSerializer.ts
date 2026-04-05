@@ -1,4 +1,5 @@
 import type { SerializedNode, SerializedNodes } from "@craftjs/core";
+import { isRecord } from "./typeGuards";
 
 // Blocks that render a single prop as positional text (rest-of-line)
 const POSITIONAL_PROP: Record<string, string> = {
@@ -22,10 +23,6 @@ const DEFAULT_BLOCK_NAME = "Block";
 const ROOT_NODE_ID = "ROOT";
 const MAX_SERIALIZE_DEPTH = 64;
 const SKIPPED_PROP_KEYS = new Set(["children"]);
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
 
 function readNodeProps(node: SerializedNode): NodeProps {
   return isRecord(node.props) ? node.props : {};

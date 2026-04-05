@@ -6,6 +6,7 @@ import { buildStaticHtmlDocument } from "@/lib/htmlExport";
 import { sanitizeExportName } from "@/lib/emailAddress";
 import { walkEmail } from "@/lib/emailWalker";
 import { EmailDocument } from "@/components/renderers/email/EmailDocument";
+import { jsonErrorMessage, safeJsonResponse } from "@/lib/safeJson";
 
 type SendMode = "attach-web-html" | "attach-sources" | "inline-email-html";
 
@@ -24,16 +25,6 @@ function downloadText(filename: string, text: string, mimeType = "text/plain;cha
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
-}
-
-async function parseJsonSafe<T>(response: Response): Promise<T | null> {
-  const raw = (await response.text()).trim();
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
 }
 
 export const ExportHtmlPanel = ({
@@ -65,7 +56,7 @@ export const ExportHtmlPanel = ({
       try {
         const response = await fetch("/api/email/send", { cache: "no-store" });
         if (!response.ok) return;
-        const json = await parseJsonSafe<{ fromAddresses?: string[] }>(response);
+        const json = await safeJsonResponse<{ fromAddresses?: string[] }>(response);
         const nextFrom = Array.isArray(json?.fromAddresses) ? json.fromAddresses : [];
         if (cancelled) return;
         setFromAddresses(nextFrom);
@@ -156,9 +147,9 @@ export const ExportHtmlPanel = ({
         }),
       });
 
-      const data = await parseJsonSafe<{ error?: string }>(response);
+      const data = await safeJsonResponse<{ error?: string }>(response);
       if (!response.ok) {
-        setStatus(data?.error || "Send failed.");
+        setStatus(jsonErrorMessage(data, `Send failed (${response.status}).`));
         return;
       }
       setStatus("Email queued via Resend.");

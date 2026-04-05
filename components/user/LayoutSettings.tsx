@@ -3,7 +3,7 @@ import React from "react";
 import {
   RemSliderField,
   SelectField,
-  ColorField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -17,6 +17,6 @@ export const LayoutSettings = () => (
     />
     <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={1} />
     <RemSliderField label="Padding" propKey="padding" min={0} max={10} step={0.25} fallback={1} />
-    <ColorField label="Background" propKey="background" />
+    <BackgroundField />
   </FieldStack>
 );

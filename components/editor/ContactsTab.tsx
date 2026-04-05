@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { jsonErrorMessage, safeJsonResponse } from "@/lib/safeJson";
 
 type Contact = {
   id: string;
@@ -132,15 +133,15 @@ export const ContactsTab = () => {
   const loadContacts = React.useCallback(async () => {
     try {
       const response = await fetch("/api/contacts", { cache: "no-store" });
-      const json = (await response.json()) as {
+      const json = await safeJsonResponse<{
         contacts?: Contact[];
         error?: string;
-      };
+      }>(response);
       if (!response.ok) {
-        setStatus(json.error || "Failed to load contacts.");
+        setStatus(jsonErrorMessage(json, `Failed to load contacts (${response.status}).`));
         return;
       }
-      setContacts(Array.isArray(json.contacts) ? json.contacts : []);
+      setContacts(Array.isArray(json?.contacts) ? json.contacts : []);
     } catch {
       setStatus("Failed to load contacts.");
     }
@@ -174,16 +175,16 @@ export const ContactsTab = () => {
         `/api/contacts?email=${encodeURIComponent(safeEmail)}`,
         { cache: "no-store" },
       );
-      const json = (await response.json()) as {
+      const json = await safeJsonResponse<{
         purchases?: PurchasedProduct[];
         error?: string;
-      };
+      }>(response);
       if (!response.ok) {
-        setStatus(json.error || "Failed to load purchased products.");
+        setStatus(jsonErrorMessage(json, `Failed to load purchased products (${response.status}).`));
         setPurchases([]);
         return;
       }
-      setPurchases(Array.isArray(json.purchases) ? json.purchases : []);
+      setPurchases(Array.isArray(json?.purchases) ? json.purchases : []);
     } catch {
       setStatus("Failed to load purchased products.");
       setPurchases([]);
@@ -232,9 +233,9 @@ export const ContactsTab = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
       });
-      const json = (await response.json()) as { error?: string };
+      const json = await safeJsonResponse<{ error?: string }>(response);
       if (!response.ok) {
-        setStatus(json.error || "Failed to save contact.");
+        setStatus(jsonErrorMessage(json, `Failed to save contact (${response.status}).`));
         return;
       }
       await loadContacts();
@@ -252,18 +253,22 @@ export const ContactsTab = () => {
     setStatus("Reverted.");
   };
 
+  const searchableContacts = React.useMemo(
+    () =>
+      contacts.map((contact) => ({
+        contact,
+        haystack: `${contact.name}\n${contact.email}\n${contact.phone}\n${contact.notes}`.toLowerCase(),
+      })),
+    [contacts],
+  );
+
   const filteredContacts = React.useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return contacts;
-    return contacts.filter((contact) => {
-      return (
-        contact.name.toLowerCase().includes(q) ||
-        contact.email.toLowerCase().includes(q) ||
-        contact.phone.toLowerCase().includes(q) ||
-        contact.notes.toLowerCase().includes(q)
-      );
-    });
-  }, [contacts, search]);
+    return searchableContacts
+      .filter((entry) => entry.haystack.includes(q))
+      .map((entry) => entry.contact);
+  }, [contacts, searchableContacts, search]);
 
   return (
     <div className="space-y-3">

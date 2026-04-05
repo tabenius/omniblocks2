@@ -17,6 +17,7 @@ import { DocumentsPanel } from "./DocumentsPanel";
 import { ExportHtmlPanel } from "./ExportHtmlPanel";
 import { STYLE_STORAGE_KEY, STORAGE_KEY } from "@/lib/editorStorage";
 import { readSavedDocuments } from "@/lib/documentStore";
+import { safeJsonResponse } from "@/lib/safeJson";
 import {
   STARTUP_ASSETS_CACHE_KEY,
   STARTUP_GOOGLE_FONTS_CACHE_KEY,
@@ -30,6 +31,11 @@ export type ToolbarTab = "settings" | "send" | "export-source" | "save-load" | "
 type PrimaryPanelTab = Exclude<ToolbarTab, "style">;
 const VIEWPORT_STORAGE_KEY = "omnieditor-viewport-mode";
 type EditorShellMode = "full" | "style-only";
+type AutoSaveNotice = {
+  level: "warning" | "error";
+  message: string;
+};
+const AUTOSAVE_WARNING_BYTES = 3_500_000;
 
 type ThemeStyleTokens = {
   background: string;
@@ -717,23 +723,20 @@ function normalizePrimaryPanelTab(input?: ToolbarTab): PrimaryPanelTab {
   return "settings";
 }
 
-async function parseJsonResponseSafe<T>(response: Response): Promise<T | null> {
-  const text = (await response.text()).trim();
-  if (!text) return null;
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    return null;
-  }
-}
-
 // ── AutoSaveLoader ────────────────────────────────────────────────
 // Must live inside <Editor> to access useEditor
-const AutoSaveLoader = ({ initialDocSlug }: { initialDocSlug?: string }) => {
+const AutoSaveLoader = ({
+  initialDocSlug,
+  onNoticeChange,
+}: {
+  initialDocSlug?: string;
+  onNoticeChange?: (notice: AutoSaveNotice | null) => void;
+}) => {
   const { actions, query, nodes } = useEditor((state) => ({
     nodes: state.nodes,
   }));
   const [loaded, setLoaded] = React.useState(false);
+  const lastSavedRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
     const fromSlug =
@@ -741,7 +744,10 @@ const AutoSaveLoader = ({ initialDocSlug }: { initialDocSlug?: string }) => {
       readSavedDocuments().find((doc) => doc.slug === initialDocSlug)?.content;
     const saved = fromSlug ?? localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      try { actions.deserialize(saved); } catch (e) {
+      try {
+        actions.deserialize(saved);
+        lastSavedRef.current = saved;
+      } catch (e) {
         console.warn("Failed to restore editor state:", e);
       }
     }
@@ -752,11 +758,28 @@ const AutoSaveLoader = ({ initialDocSlug }: { initialDocSlug?: string }) => {
     if (!loaded) return;
     const timer = setTimeout(() => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(query.getSerializedNodes()));
-      } catch { /* storage full */ }
+        const serialized = JSON.stringify(query.getSerializedNodes());
+        const byteSize = new Blob([serialized]).size;
+        if (byteSize >= AUTOSAVE_WARNING_BYTES) {
+          onNoticeChange?.({
+            level: "warning",
+            message: `Autosave payload is ${Math.round(byteSize / 1024)} KB. Large local images can exceed browser storage limits.`,
+          });
+        } else {
+          onNoticeChange?.(null);
+        }
+        if (serialized === lastSavedRef.current) return;
+        lastSavedRef.current = serialized;
+        localStorage.setItem(STORAGE_KEY, serialized);
+      } catch {
+        onNoticeChange?.({
+          level: "error",
+          message: "Autosave failed (browser storage limit). Save a named document and avoid local-only images.",
+        });
+      }
     }, 800);
     return () => clearTimeout(timer);
-  }, [loaded, nodes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loaded, nodes, onNoticeChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 };
@@ -1103,7 +1126,15 @@ export default function EditorShell({
   const [startupLoading, setStartupLoading] = React.useState(true);
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [rightPanelOpen, setRightPanelOpen] = React.useState(false);
+  const [autoSaveNotice, setAutoSaveNotice] = React.useState<AutoSaveNotice | null>(null);
   const styleOnly = mode === "style-only";
+
+  const handleAutoSaveNotice = React.useCallback((next: AutoSaveNotice | null) => {
+    setAutoSaveNotice((prev) => {
+      if (prev?.level === next?.level && prev?.message === next?.message) return prev;
+      return next;
+    });
+  }, []);
 
   const toggleLeftPanel = () => {
     setLeftPanelOpen((current) => {
@@ -1377,7 +1408,7 @@ export default function EditorShell({
         }
 
         const response = await fetch("/api/r2/startup", { cache: "no-store" });
-        const json = await parseJsonResponseSafe<{ ok?: boolean; assets?: unknown }>(response);
+        const json = await safeJsonResponse<{ ok?: boolean; assets?: unknown }>(response);
         if (!response.ok || !json?.ok) {
           if (!cancelled) setStartupLoading(false);
           return;
@@ -1449,7 +1480,7 @@ export default function EditorShell({
       </button>
 
       <Editor resolver={resolver} onRender={RenderNode}>
-        <AutoSaveLoader initialDocSlug={initialDocSlug} />
+        <AutoSaveLoader initialDocSlug={initialDocSlug} onNoticeChange={handleAutoSaveNotice} />
 
         {/* Left sidebar — editor chrome */}
         {!styleOnly ? (
@@ -1565,6 +1596,24 @@ export default function EditorShell({
               </div>
             </section>
           )}
+          {autoSaveNotice ? (
+            <section
+              className="rounded-md border p-2 text-xs"
+              style={{
+                borderColor:
+                  autoSaveNotice.level === "error"
+                    ? "var(--color-danger)"
+                    : "var(--color-warning)",
+                background: "var(--color-muted)",
+                color: "var(--color-foreground)",
+              }}
+            >
+              <div className="uppercase tracking-wide mb-1">
+                {autoSaveNotice.level === "error" ? "Autosave Error" : "Autosave Warning"}
+              </div>
+              <div className="text-[11px] leading-4">{autoSaveNotice.message}</div>
+            </section>
+          ) : null}
           {!styleOnly ? (
             <>
               <ViewportModeToggle value={viewportMode} onChange={setViewportMode} />
@@ -1596,7 +1645,7 @@ export default function EditorShell({
                     </button>
                   ))}
                 </div>
-                <div className="p-3 bg-[var(--color-muted)] max-h-[62vh] overflow-y-auto pr-1">
+                <div className="p-3 bg-[var(--color-muted)]">
                   {toolbarTab === "settings" ? (
                     <div className="space-y-2">
                       <div className="text-[11px] uppercase tracking-wide text-[var(--color-muted-foreground)]">
