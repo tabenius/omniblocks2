@@ -24,7 +24,7 @@ export const Container = ({
         if (ref) connect(drag(ref));
       }}
       style={{ background, padding }}
-      className="min-h-[40px] border border-dashed border-gray-300"
+      className="min-h-[40px]"
     >
       {children}
     </div>

@@ -31,11 +31,11 @@ export const Toolbox = () => {
       group: "Inline",
       create: <AlterParagraph text="Alternate paragraph text" />,
     },
-    { label: "Image", group: "Media", create: <ImageBlock /> },
-    { label: "Diagram", group: "Media", create: <Diagram /> },
-    { label: "Audio", group: "Media", create: <Audio /> },
+    { label: "Image",    group: "Media",       create: <ImageBlock /> },
+    { label: "Diagram",  group: "Media",       create: <Diagram /> },
+    { label: "Audio",    group: "Media",       create: <Audio /> },
     { label: "Template", group: "Interactive", create: <Template /> },
-    { label: "Author", group: "Inline", create: <Author /> },
+    { label: "Author",   group: "Inline",      create: <Author /> },
     {
       label: "Asset",
       group: "Containers",
@@ -96,10 +96,10 @@ export const Toolbox = () => {
     <div className="space-y-4">
       {groups.map((group) => (
         <div key={group}>
-          <div className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+          <div className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)] mb-2">
             {group}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {items
               .filter((i) => i.group === group)
               .map((item) => (
@@ -108,7 +108,7 @@ export const Toolbox = () => {
                   ref={(ref) => {
                     if (ref) connectors.create(ref, item.create);
                   }}
-                  className="w-full text-left px-3 py-2 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-grab active:cursor-grabbing text-sm"
+                  className="w-full text-left px-3 py-2 rounded border border-[var(--color-border)] bg-[var(--color-secondary)] hover:bg-[var(--color-surface)] cursor-grab active:cursor-grabbing text-sm text-[var(--color-foreground)] transition-colors"
                 >
                   {item.label}
                 </button>

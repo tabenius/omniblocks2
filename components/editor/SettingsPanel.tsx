@@ -20,17 +20,21 @@ export const SettingsPanel = () => {
 
   if (!selected) {
     return (
-      <div className="text-sm text-gray-500">Select a block to edit its settings.</div>
+      <div className="text-sm text-[var(--color-muted-foreground)]">
+        Select a block to edit its settings.
+      </div>
     );
   }
 
   return (
     <div>
-      <div className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+      <div className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)] mb-3">
         {selected.name}
       </div>
-      {selected.settings ? <selected.settings /> : (
-        <div className="text-sm text-gray-500">No settings.</div>
+      {selected.settings ? (
+        <selected.settings />
+      ) : (
+        <div className="text-sm text-[var(--color-muted-foreground)]">No settings.</div>
       )}
     </div>
   );
