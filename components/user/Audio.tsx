@@ -1,0 +1,98 @@
+"use client";
+import React from "react";
+import { useNode } from "@craftjs/core";
+import {
+  TextField,
+  BooleanField,
+  FieldStack,
+} from "@/components/editor/fields";
+
+export type AudioProps = {
+  src?: string;
+  title?: string;
+  controls?: boolean;
+  autoPlay?: boolean;
+  loop?: boolean;
+  background?: string;
+  padding?: string;
+  borderRadius?: string;
+};
+
+export const Audio = ({
+  src = "https://www.w3schools.com/html/horse.mp3",
+  title = "Audio",
+  controls = true,
+  autoPlay = false,
+  loop = false,
+  background = "var(--color-muted)",
+  padding = "var(--space-sm) var(--space-md)",
+  borderRadius = "var(--radius-md)",
+}: AudioProps) => {
+  const {
+    connectors: { connect, drag },
+  } = useNode();
+
+  return (
+    <div
+      ref={(ref: HTMLDivElement | null) => {
+        if (ref) connect(drag(ref));
+      }}
+      style={{
+        background,
+        padding,
+        borderRadius,
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        border: "1px solid var(--color-border)",
+      }}
+    >
+      {title && (
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 600,
+            color: "var(--color-foreground)",
+            fontFamily: "var(--font-default)",
+          }}
+        >
+          {title}
+        </div>
+      )}
+      <audio
+        src={src}
+        controls={controls}
+        autoPlay={autoPlay}
+        loop={loop}
+        style={{ width: "100%" }}
+      />
+    </div>
+  );
+};
+
+const AudioSettings = () => (
+  <FieldStack>
+    <TextField label="Title" propKey="title" />
+    <TextField label="Source URL" propKey="src" />
+    <BooleanField label="Controls" propKey="controls" />
+    <BooleanField label="Autoplay" propKey="autoPlay" />
+    <BooleanField label="Loop" propKey="loop" />
+    <TextField label="Padding" propKey="padding" />
+    <TextField label="Border radius" propKey="borderRadius" />
+  </FieldStack>
+);
+
+Audio.craft = {
+  displayName: "Audio",
+  props: {
+    src: "https://www.w3schools.com/html/horse.mp3",
+    title: "Audio",
+    controls: true,
+    autoPlay: false,
+    loop: false,
+    background: "var(--color-muted)",
+    padding: "var(--space-sm) var(--space-md)",
+    borderRadius: "var(--radius-md)",
+  },
+  related: { settings: AudioSettings },
+};
