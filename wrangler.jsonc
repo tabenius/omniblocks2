@@ -1,0 +1,34 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "omniland2",
+  "main": ".open-next/worker.js",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "compatibility_date": "2025-01-15",
+  "vars": {
+    "CF_DB_ID": "64f99034-504d-4389-ab45-fd85cf63ae3f",
+    "CLOUDFLARE_ACCOUNT_ID": "cb4966b6dcf9f7041be81b1d1092f792",
+    "UPLOAD_BACKEND": "r2",
+    "S3_BUCKET_NAME": "sofiacerne",
+    "S3_REGION": "auto",
+    "S3_PUBLIC_URL": "https://pub-e84fd23dec9840a39cb1c4ae26afe418.r2.dev"
+  },
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "sofiacerne",
+      "remote": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sofiacerne",
+      "database_id": "64f99034-504d-4389-ab45-fd85cf63ae3f",
+      "remote": true
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+H1 Evening of Trust, Presence, and Grounded Connection
+Paragraph A consent-centered neo-tantra event within a white tantra safety paradigm.
+Paragraph All exercises are opt-in. Clear boundaries, verbal consent, and trauma-aware facilitation are required in every segment.
+H2 Program Flow
+LayoutBlock columns=2 gap=16px padding=0px background=transparent
+  Container padding=16px background=var(--color-surface)
+    H3 Session Arc
+    Paragraph 1) Arrival and nervous-system settling
+    Paragraph 2) Circle of trust teachings and partner communication drills
+    Paragraph 3) Integration and supervised cuddle party close
+  Container padding=16px background=var(--color-surface)
+    H3 Safety Commitments
+    Paragraph No pressure to participate in any touch practice
+    Paragraph Explicit yes/no check-ins before and during every exercise
+    Paragraph Facilitators intervene immediately on boundary uncertainty
+H2 Circle of Trust Teaching Focus
+Paragraph We practice pacing, attunement, and repair language so participants can recognize consent, hesitation, and emotional safety in real time.
+Paragraph The goal is not intensity. The goal is trustworthy connection supported by clear agreements.
+PrimaryBox padding=var(--space-lg) gap=var(--space-sm) background=var(--color-primary) color=var(--color-primary-foreground)
+  H3 Closing: Supervised Cuddle Party
+  Paragraph The evening ends with a cuddle party supervised by two qualified leaders from the neo-tantra community.
+  Paragraph Leaders: Mara Nilsson (somatic practitioner) and David Roemer (consent educator).
+  Paragraph Cuddle participation is optional, clothed, and continuously consent-checked.

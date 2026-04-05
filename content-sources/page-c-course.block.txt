@@ -1,0 +1,30 @@
+H1 Psychosynthesis in Practice: A Four-Part Learning Journey
+Paragraph This course follows the spirit of Roberto Assagioli and Piero Ferrucci, integrating self-observation, goodwill, and the disciplined use of will.
+H2 Course Structure: Four Events
+LayoutBlock columns=2 gap=16px padding=0px background=transparent
+  Container padding=16px background=var(--color-surface)
+    H3 Part 1: Psychosynthesis Foundations
+    Paragraph Subpersonalities, observing self, and disidentification methods for stable inner witnessing.
+  Container padding=16px background=var(--color-surface)
+    H3 Part 2: Piero Ferrucci Practices
+    Paragraph Exercises in kindness, appreciative attention, and practical goodwill in relationships and work.
+LayoutBlock columns=2 gap=16px padding=0px background=transparent
+  Container padding=16px background=var(--color-surface)
+    H3 Part 3: The Act of Will
+    Paragraph Training strong, skillful, good, and transpersonal will to direct energy toward meaningful aims.
+  Container padding=16px background=var(--color-surface)
+    H3 Part 4: Integration Lab
+    Paragraph Apply both pathways in real projects, with peer reflection and weekly commitment cycles.
+H2 Two Complementary Paths
+LayoutBlock columns=2 gap=16px padding=0px background=transparent
+  PrimaryBox padding=var(--space-lg) gap=var(--space-sm) background=var(--color-primary) color=var(--color-primary-foreground)
+    H3 Path 1: Mystic / Dreamer to Action
+    Paragraph 1) Sense the image and deeper intention.
+    Paragraph 2) Translate vision into a plan with milestones.
+    Paragraph 3) Commit to the first concrete step and execute it within 24 hours.
+  Container padding=16px background=var(--color-surface)
+    H3 Path 2: Action to Plan to Dream
+    Paragraph 1) Start from one concrete action already underway.
+    Paragraph 2) Build the plan and gather the needed resources.
+    Paragraph 3) Let the larger dream emerge from disciplined engagement.
+Paragraph Outcome: participants leave with an inner framework and an executable pathway they can apply to real life projects immediately.

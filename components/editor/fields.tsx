@@ -8,6 +8,8 @@ const inputCls =
   "w-full border border-[var(--color-border)] rounded px-2 py-1 text-sm " +
   "bg-[var(--color-muted)] text-[var(--color-foreground)] " +
   "focus:outline-none focus:border-[var(--color-primary)]";
+const rangeCls =
+  "w-full accent-[var(--color-primary)]";
 
 type Parse<T> = (raw: string) => T;
 
@@ -47,6 +49,132 @@ export function TextField({
       />
     </label>
   );
+}
+
+type ScalarSliderFieldProps = {
+  label: string;
+  propKey: string;
+  min: number;
+  max: number;
+  step: number;
+  fallback: number;
+  unit?: "rem" | "px" | "%" | "";
+};
+
+function parseNumber(raw: unknown): number | null {
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+  if (typeof raw !== "string") return null;
+  const match = raw.trim().match(/-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+  const parsed = Number(match[0]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseScalarForUnit(
+  raw: unknown,
+  unit: ScalarSliderFieldProps["unit"],
+  fallback: number,
+): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+  if (typeof raw !== "string") return fallback;
+  const input = raw.trim().toLowerCase();
+  const parsed = parseNumber(input);
+  if (parsed == null) return fallback;
+
+  if (unit === "rem") {
+    if (input.includes("px")) return parsed / 16;
+    return parsed;
+  }
+  if (unit === "px") {
+    if (input.includes("rem")) return parsed * 16;
+    return parsed;
+  }
+  return parsed;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function formatNumber(value: number): string {
+  const fixed = Number(value.toFixed(4));
+  return Number.isInteger(fixed) ? String(fixed) : String(fixed);
+}
+
+function formatValue(value: number, unit: ScalarSliderFieldProps["unit"]): string {
+  const n = formatNumber(value);
+  return unit ? `${n}${unit}` : n;
+}
+
+export function ScalarSliderField({
+  label,
+  propKey,
+  min,
+  max,
+  step,
+  fallback,
+  unit = "",
+}: ScalarSliderFieldProps) {
+  const [value, set] = useProp<string | number>(propKey);
+  const numeric = clamp(parseScalarForUnit(value, unit, fallback), min, max);
+  const onChange = (nextRaw: string) => {
+    const parsed = Number(nextRaw);
+    if (!Number.isFinite(parsed)) return;
+    const next = clamp(parsed, min, max);
+    set(formatValue(next, unit));
+  };
+
+  return (
+    <label className={labelCls}>
+      <span className={spanCls}>
+        {label} <code className="text-[10px]">{formatValue(numeric, unit)}</code>
+      </span>
+      <div className="flex items-center gap-2">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={numeric}
+          onChange={(e) => onChange(e.target.value)}
+          className={rangeCls}
+        />
+        <input
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={numeric}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-20 border border-[var(--color-border)] rounded px-2 py-1 text-xs bg-[var(--color-muted)] text-[var(--color-foreground)]"
+        />
+      </div>
+    </label>
+  );
+}
+
+export function RemSliderField(
+  props: Omit<ScalarSliderFieldProps, "unit">,
+) {
+  return <ScalarSliderField {...props} unit="rem" />;
+}
+
+export function PxSliderField(
+  props: Omit<ScalarSliderFieldProps, "unit">,
+) {
+  return <ScalarSliderField {...props} unit="px" />;
+}
+
+export function PercentSliderField(
+  props: Omit<ScalarSliderFieldProps, "unit">,
+) {
+  return <ScalarSliderField {...props} unit="%" />;
+}
+
+export function UnitlessSliderField(
+  props: Omit<ScalarSliderFieldProps, "unit">,
+) {
+  return <ScalarSliderField {...props} unit="" />;
 }
 
 export function TextAreaField({

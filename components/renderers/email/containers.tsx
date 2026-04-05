@@ -7,6 +7,7 @@ import type { HeroProps } from "@/components/user/Hero";
 import type { PrimaryBoxProps } from "@/components/user/PrimaryBox";
 import type { AssetProps } from "@/components/user/Asset";
 import type { QuoteProps } from "@/components/user/Quote";
+import type { FormProps } from "@/components/user/Form";
 
 /**
  * Generic single-cell table wrapper. Outlook-safe fallback for div.
@@ -71,6 +72,23 @@ export const TextBlockEmail = ({
   children,
 }: TextBlockProps & { children?: React.ReactNode }) => (
   <TableBox background={background} padding={padding}>
+    {children}
+  </TableBox>
+);
+
+export const FormEmail = ({
+  background,
+  padding,
+  borderRadius,
+  borderColor,
+  children,
+}: FormProps & { children?: React.ReactNode }) => (
+  <TableBox
+    background={background}
+    padding={padding}
+    borderRadius={borderRadius}
+    border={`1px solid ${borderColor ?? "var(--color-border)"}`}
+  >
     {children}
   </TableBox>
 );

@@ -3,9 +3,13 @@ import React from "react";
 import { useNode } from "@craftjs/core";
 import {
   TextField,
+  PercentSliderField,
+  PxSliderField,
+  RemSliderField,
   SelectField,
   FieldStack,
 } from "@/components/editor/fields";
+import { R2ImageSourceField } from "@/components/editor/R2ImageSourceField";
 
 export type ImageBlockProps = {
   src?: string;
@@ -54,20 +58,36 @@ export const ImageBlock = ({
   );
 };
 
-const ImageBlockSettings = () => (
-  <FieldStack>
-    <TextField label="Src" propKey="src" />
-    <TextField label="Alt" propKey="alt" />
-    <TextField label="Width" propKey="width" />
-    <TextField label="Max width" propKey="maxWidth" />
-    <TextField label="Border radius" propKey="borderRadius" />
-    <SelectField
-      label="Align"
-      propKey="align"
-      options={["left", "center", "right"] as const}
-    />
-  </FieldStack>
-);
+const ImageBlockSettings = () => {
+  const {
+    src,
+    actions: { setProp },
+  } = useNode((node) => ({
+    src: String((node.data.props as ImageBlockProps).src || ""),
+  }));
+
+  return (
+    <FieldStack>
+      <R2ImageSourceField
+        value={src}
+        onChange={(next) =>
+          setProp((props: ImageBlockProps) => {
+            props.src = next;
+          })
+        }
+      />
+      <TextField label="Alt" propKey="alt" />
+      <PercentSliderField label="Width" propKey="width" min={10} max={100} step={1} fallback={100} />
+      <PxSliderField label="Max width" propKey="maxWidth" min={120} max={1920} step={10} fallback={800} />
+      <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={4} step={0.125} fallback={0} />
+      <SelectField
+        label="Align"
+        propKey="align"
+        options={["left", "center", "right"] as const}
+      />
+    </FieldStack>
+  );
+};
 
 ImageBlock.craft = {
   displayName: "Image",
@@ -85,7 +105,13 @@ ImageBlock.craft = {
       // Allow drop into Hero, root Container, or root canvas. Craft.js enforces
       // canMoveIn on the parent too, so this mostly guides UX.
       const name = targetNode.data.name;
-      return name === "Hero" || name === "Container" || name === "TextBlock" || name === "PrimaryBox";
+      return (
+        name === "Hero" ||
+        name === "Container" ||
+        name === "TextBlock" ||
+        name === "PrimaryBox" ||
+        name === "Masonry"
+      );
     },
   },
 };

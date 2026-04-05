@@ -4,7 +4,7 @@ import { useNode } from "@craftjs/core";
 import {
   TextAreaField,
   SelectField,
-  TextField,
+  RemSliderField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -23,8 +23,71 @@ const DEFAULT_SOURCE = `flowchart LR
   B --> C[Web Render]
   B --> D[Email Render]`;
 
+const MERMAID_CDN_URL = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+const MERMAID_SCRIPT_ID = "omni-mermaid-runtime";
+
+type MermaidRuntime = {
+  initialize: (config: Record<string, unknown>) => void;
+  render: (id: string, text: string) => Promise<{ svg: string }>;
+};
+
+declare global {
+  interface Window {
+    mermaid?: MermaidRuntime;
+    __omniMermaidLoader?: Promise<MermaidRuntime>;
+  }
+}
+
 let mermaidInit = false;
 let diagramCounter = 0;
+
+function loadMermaidRuntime(): Promise<MermaidRuntime> {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Mermaid runtime is only available in the browser."));
+  }
+  if (window.mermaid) {
+    return Promise.resolve(window.mermaid);
+  }
+  if (window.__omniMermaidLoader) {
+    return window.__omniMermaidLoader;
+  }
+
+  window.__omniMermaidLoader = new Promise<MermaidRuntime>((resolve, reject) => {
+    const existing = document.getElementById(MERMAID_SCRIPT_ID) as HTMLScriptElement | null;
+    if (existing) {
+      const checkLoaded = () => {
+        if (window.mermaid) {
+          resolve(window.mermaid);
+        } else {
+          reject(new Error("Mermaid script loaded but runtime was not found."));
+        }
+      };
+      existing.addEventListener("load", checkLoaded, { once: true });
+      existing.addEventListener(
+        "error",
+        () => reject(new Error("Failed to load Mermaid runtime script.")),
+        { once: true },
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = MERMAID_SCRIPT_ID;
+    script.src = MERMAID_CDN_URL;
+    script.async = true;
+    script.onload = () => {
+      if (window.mermaid) {
+        resolve(window.mermaid);
+      } else {
+        reject(new Error("Mermaid script loaded but runtime was not found."));
+      }
+    };
+    script.onerror = () => reject(new Error("Failed to load Mermaid runtime script."));
+    document.head.appendChild(script);
+  });
+
+  return window.__omniMermaidLoader;
+}
 
 export const Diagram = ({
   source = DEFAULT_SOURCE,
@@ -46,7 +109,7 @@ export const Diagram = ({
     let cancelled = false;
     (async () => {
       try {
-        const mermaid = (await import("mermaid")).default;
+        const mermaid = await loadMermaidRuntime();
         if (!mermaidInit) {
           mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
           mermaidInit = true;
@@ -107,6 +170,14 @@ export const Diagram = ({
 
 const DiagramSettings = () => (
   <FieldStack>
+    <a
+      href="https://mermaid.js.org/syntax/flowchart.html"
+      target="_blank"
+      rel="noreferrer"
+      className="text-xs text-[var(--color-accent)] underline"
+    >
+      Mermaid syntax manual
+    </a>
     <SelectField
       label="View"
       propKey="view"
@@ -116,8 +187,8 @@ const DiagramSettings = () => (
       ]}
     />
     <TextAreaField label="Mermaid source" propKey="source" rows={10} />
-    <TextField label="Padding" propKey="padding" />
-    <TextField label="Border radius" propKey="borderRadius" />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={8} step={0.25} fallback={1} />
+    <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={4} step={0.125} fallback={0.5} />
   </FieldStack>
 );
 

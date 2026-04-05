@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useNode } from "@craftjs/core";
-import { TextField, ColorField, FieldStack } from "@/components/editor/fields";
+import { RemSliderField, ColorField, FieldStack } from "@/components/editor/fields";
 
 export type TextBlockProps = {
   padding?: string;
@@ -41,8 +41,8 @@ export const TextBlock = ({
 
 const TextBlockSettings = () => (
   <FieldStack>
-    <TextField label="Padding" propKey="padding" />
-    <TextField label="Gap" propKey="gap" />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={12} step={0.25} fallback={1} />
+    <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={0.75} />
     <ColorField label="Background" propKey="background" />
   </FieldStack>
 );
@@ -60,7 +60,8 @@ TextBlock.craft = {
         (n) =>
           n.data.name === "Heading" ||
           n.data.name === "Paragraph" ||
-          n.data.name === "AlterParagraph"
+          n.data.name === "AlterParagraph" ||
+          n.data.name === "Button"
       ),
   },
   related: { settings: TextBlockSettings },

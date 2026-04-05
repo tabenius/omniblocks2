@@ -2,13 +2,13 @@
 import React from "react";
 import { useNode } from "@craftjs/core";
 import {
-  TextField,
+  RemSliderField,
   SelectField,
   FieldStack,
 } from "@/components/editor/fields";
 
 export type MasonryProps = {
-  columns?: 2 | 3 | 4;
+  columns?: number;
   gap?: string;
   padding?: string;
   children?: React.ReactNode;
@@ -17,12 +17,19 @@ export type MasonryProps = {
 export const Masonry = ({
   columns = 3,
   gap = "12px",
-  padding = "0px",
+  padding = "8px",
   children,
 }: MasonryProps) => {
   const {
+    selected,
+    hovered,
     connectors: { connect, drag },
-  } = useNode();
+  } = useNode((node) => ({
+    selected: node.events.selected,
+    hovered: node.events.hovered,
+  }));
+
+  const safeColumns = Number.isFinite(columns) ? Math.max(1, Math.min(6, Math.round(columns))) : 3;
 
   return (
     <div
@@ -30,11 +37,19 @@ export const Masonry = ({
         if (ref) connect(drag(ref));
       }}
       style={{
-        columnCount: columns,
+        columnCount: safeColumns,
         columnGap: gap,
         padding,
+        minHeight: 80,
+        borderRadius: 8,
+        outline: selected
+          ? "2px solid #3b82f6"
+          : hovered
+            ? "1.5px dashed #93c5fd"
+            : "1px dashed rgba(15, 23, 42, 0.22)",
+        outlineOffset: 1,
       }}
-      className="[&>*]:mb-[var(--masonry-gap)] [&>*]:break-inside-avoid"
+      className="[&>*]:break-inside-avoid"
     >
       <style>{`[style*="column-count"] > * { margin-bottom: ${gap}; break-inside: avoid; }`}</style>
       {children}
@@ -47,11 +62,11 @@ const MasonrySettings = () => (
     <SelectField
       label="Columns"
       propKey="columns"
-      options={[2, 3, 4]}
-      parse={(v) => Number(v) as 2 | 3 | 4}
+      options={[1, 2, 3, 4, 5, 6]}
+      parse={(v) => Math.max(1, Math.min(6, Math.round(Number(v))))}
     />
-    <TextField label="Gap" propKey="gap" />
-    <TextField label="Padding" propKey="padding" />
+    <RemSliderField label="Gap" propKey="gap" min={0} max={4} step={0.25} fallback={0.75} />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={8} step={0.25} fallback={0.5} />
   </FieldStack>
 );
 
@@ -60,7 +75,7 @@ Masonry.craft = {
   props: {
     columns: 3,
     gap: "12px",
-    padding: "0px",
+    padding: "8px",
   },
   related: { settings: MasonrySettings },
   rules: {

@@ -4,6 +4,8 @@ import { useNode } from "@craftjs/core";
 import {
   TextAreaField,
   TextField,
+  RemSliderField,
+  UnitlessSliderField,
   ColorField,
   AlignField,
   FieldStack,
@@ -12,6 +14,7 @@ import {
 export type AlterParagraphProps = {
   text?: string;
   fontSize?: string;
+  lineHeight?: string;
   fontFamily?: string;
   color?: string;
   textAlign?: "left" | "center" | "right";
@@ -21,6 +24,7 @@ export type AlterParagraphProps = {
 export const AlterParagraph = ({
   text = "Alternate paragraph text",
   fontSize = "var(--text-base)",
+  lineHeight = "var(--line-height-base, 1.5)",
   fontFamily = "var(--font-alternate)",
   color = "var(--color-foreground)",
   textAlign = "left",
@@ -35,7 +39,17 @@ export const AlterParagraph = ({
       ref={(ref: HTMLParagraphElement | null) => {
         if (ref) connect(drag(ref));
       }}
-      style={{ fontSize, fontFamily, color, textAlign, fontStyle, margin: 0 }}
+      style={{
+        fontSize,
+        lineHeight,
+        fontFamily,
+        color,
+        textAlign,
+        fontStyle,
+        margin: 0,
+        width: "100%",
+        alignSelf: "stretch",
+      }}
     >
       {text}
     </p>
@@ -46,7 +60,8 @@ const AlterParagraphSettings = () => (
   <FieldStack>
     <TextAreaField label="Text" propKey="text" rows={4} />
     <TextField label="Font family" propKey="fontFamily" />
-    <TextField label="Font size" propKey="fontSize" />
+    <RemSliderField label="Font size" propKey="fontSize" min={0.75} max={4} step={0.125} fallback={1} />
+    <UnitlessSliderField label="Line height" propKey="lineHeight" min={1} max={2.4} step={0.05} fallback={1.5} />
     <ColorField label="Color" propKey="color" />
     <AlignField />
     <TextField label="Font style" propKey="fontStyle" />
@@ -58,6 +73,7 @@ AlterParagraph.craft = {
   props: {
     text: "Alternate paragraph text",
     fontSize: "var(--text-base)",
+    lineHeight: "var(--line-height-base, 1.5)",
     fontFamily: "var(--font-alternate)",
     color: "var(--color-foreground)",
     textAlign: "left",

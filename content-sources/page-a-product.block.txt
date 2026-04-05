@@ -1,0 +1,35 @@
+Hero padding="var(--space-3xl) var(--space-xl)" gap=var(--space-md) background=var(--color-muted) textAlign=center
+  H1 Ship Better UI Reviews in Minutes
+  Paragraph Annotate screenshots, collect threaded feedback, and align your team with one clear decision trail.
+  Image /mock-product-ui.svg
+  Paragraph Trusted by product teams shipping weekly across design, growth, and engineering.
+H2 Feature Highlights
+LayoutBlock columns=3 gap=16px padding=0px background=transparent
+  Container padding=16px background=var(--color-surface)
+    H3 Visual Diff Timeline
+    Paragraph Track each design revision and compare before/after changes without losing context.
+  Container padding=16px background=var(--color-surface)
+    H3 Inline Approval Gates
+    Paragraph Move from draft to approved with explicit sign-off checkpoints for design and legal.
+  Container padding=16px background=var(--color-surface)
+    H3 Automated Handoff Notes
+    Paragraph Generate implementation notes directly from resolved comments and accepted deltas.
+H2 Choose Your Plan
+LayoutBlock columns=3 gap=16px padding=0px background=transparent
+  Container padding=16px background=var(--color-surface)
+    H3 Basic
+    Paragraph $19/mo
+    Paragraph Up to 5 projects
+    Paragraph Core comments and approvals
+  PrimaryBox padding=var(--space-lg) gap=var(--space-sm) background=var(--color-primary) color=var(--color-primary-foreground)
+    H3 Pro
+    Paragraph $39/mo
+    Paragraph Sale: 25% off for first 3 months
+    Paragraph Unlimited projects
+    Paragraph Automation + Slack handoff
+  Container padding=16px background=var(--color-surface)
+    H3 Max
+    Paragraph $89/mo
+    Paragraph Dedicated success manager
+    Paragraph Enterprise SSO + audit export
+Paragraph Start with Basic, move to Pro while the sale is active, or scale with Max when you need governance.

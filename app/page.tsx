@@ -1,8 +1,6 @@
-import dynamic from "next/dynamic";
+"use client";
 
-const EditorShell = dynamic(() => import("@/components/editor/EditorShell"), {
-  ssr: true,
-});
+import EditorShell from "@/components/editor/EditorShell";
 
 export default function Home() {
   return (

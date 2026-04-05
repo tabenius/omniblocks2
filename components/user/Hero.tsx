@@ -2,7 +2,7 @@
 import React from "react";
 import { useNode } from "@craftjs/core";
 import {
-  TextField,
+  RemSliderField,
   ColorField,
   AlignField,
   FieldStack,
@@ -55,8 +55,8 @@ export const Hero = ({
 
 const HeroSettings = () => (
   <FieldStack>
-    <TextField label="Padding" propKey="padding" />
-    <TextField label="Gap" propKey="gap" />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={12} step={0.25} fallback={4} />
+    <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={1} />
     <ColorField label="Background" propKey="background" />
     <AlignField />
   </FieldStack>

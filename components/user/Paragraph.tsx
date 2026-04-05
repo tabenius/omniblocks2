@@ -3,7 +3,8 @@ import React from "react";
 import { useNode } from "@craftjs/core";
 import {
   TextAreaField,
-  TextField,
+  RemSliderField,
+  UnitlessSliderField,
   ColorField,
   AlignField,
   FieldStack,
@@ -12,6 +13,7 @@ import {
 export type ParagraphProps = {
   text?: string;
   fontSize?: string;
+  lineHeight?: string;
   color?: string;
   textAlign?: "left" | "center" | "right";
 };
@@ -19,6 +21,7 @@ export type ParagraphProps = {
 export const Paragraph = ({
   text = "Paragraph text",
   fontSize = "var(--text-base)",
+  lineHeight = "var(--line-height-base, 1.5)",
   color = "var(--color-muted-foreground)",
   textAlign = "left",
 }: ParagraphProps) => {
@@ -31,7 +34,15 @@ export const Paragraph = ({
       ref={(ref: HTMLParagraphElement | null) => {
         if (ref) connect(drag(ref));
       }}
-      style={{ fontSize, color, textAlign, margin: 0 }}
+      style={{
+        fontSize,
+        lineHeight,
+        color,
+        textAlign,
+        margin: 0,
+        width: "100%",
+        alignSelf: "stretch",
+      }}
     >
       {text}
     </p>
@@ -41,7 +52,8 @@ export const Paragraph = ({
 const ParagraphSettings = () => (
   <FieldStack>
     <TextAreaField label="Text" propKey="text" rows={4} />
-    <TextField label="Font size" propKey="fontSize" />
+    <RemSliderField label="Font size" propKey="fontSize" min={0.75} max={4} step={0.125} fallback={1} />
+    <UnitlessSliderField label="Line height" propKey="lineHeight" min={1} max={2.4} step={0.05} fallback={1.5} />
     <ColorField label="Color" propKey="color" />
     <AlignField />
   </FieldStack>
@@ -52,6 +64,7 @@ Paragraph.craft = {
   props: {
     text: "Paragraph text",
     fontSize: "var(--text-base)",
+    lineHeight: "var(--line-height-base, 1.5)",
     color: "var(--color-muted-foreground)",
     textAlign: "left",
   },

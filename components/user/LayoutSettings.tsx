@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import {
-  TextField,
+  RemSliderField,
   SelectField,
   ColorField,
   FieldStack,
@@ -15,8 +15,8 @@ export const LayoutSettings = () => (
       options={[1, 2, 3, 4]}
       parse={(v) => Number(v) as 1 | 2 | 3 | 4}
     />
-    <TextField label="Gap" propKey="gap" />
-    <TextField label="Padding" propKey="padding" />
+    <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={1} />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={10} step={0.25} fallback={1} />
     <ColorField label="Background" propKey="background" />
   </FieldStack>
 );

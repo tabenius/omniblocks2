@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useNode } from "@craftjs/core";
-import { TextField, ColorField, FieldStack } from "@/components/editor/fields";
+import { RemSliderField, ColorField, FieldStack } from "@/components/editor/fields";
 
 export type QuoteProps = {
   padding?: string;
@@ -47,9 +47,9 @@ export const Quote = ({
 
 const QuoteSettings = () => (
   <FieldStack>
-    <TextField label="Padding" propKey="padding" />
-    <TextField label="Gap" propKey="gap" />
-    <TextField label="Border radius" propKey="borderRadius" />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={12} step={0.25} fallback={1.5} />
+    <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={0.5} />
+    <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={3} step={0.125} fallback={0.5} />
     <ColorField label="Background" propKey="background" />
     <ColorField label="Accent color" propKey="accentColor" />
   </FieldStack>

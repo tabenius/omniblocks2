@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/contacts": {},
+    "/api/email/send": {},
+    "/api/r2/images": {},
+    "/api/r2/object": {},
+    "/api/r2/startup": {}
+  }
+}

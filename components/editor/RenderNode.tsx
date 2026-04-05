@@ -39,20 +39,23 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
   // ── Border logic ──────────────────────────────────────────────────────────
   let outline = "none";
   let background: string | undefined;
+  let chromeLabelBackground = "rgba(15, 23, 42, 0.6)";
+  let chromeLabelColor = "rgba(255,255,255,0.92)";
 
   if (showChrome) {
+    outline = isCanvas ? "1px dashed rgba(15, 23, 42, 0.22)" : "1px solid rgba(15, 23, 42, 0.2)";
     if (isSelected) {
       outline = "2px solid #3b82f6";
+      chromeLabelBackground = "#3b82f6";
+      chromeLabelColor = "#ffffff";
     } else if (isHovered) {
       outline = "1.5px dashed #93c5fd";
-    } else if (isCanvas) {
-      // Canvas blocks always show a structural guide in the editor
-      outline = isDragging && isEmpty
-        ? "2px dashed #3b82f6"       // active drop target
-        : "1px dashed rgba(0,0,0,0.18)";
+      chromeLabelBackground = "rgba(59, 130, 246, 0.82)";
+      chromeLabelColor = "#ffffff";
     }
     // When dragging over an empty canvas, add a faint blue wash
     if (isDragging && isCanvas && isEmpty) {
+      outline = "2px dashed #3b82f6";
       background = "rgba(59,130,246,0.04)";
     }
   }
@@ -64,11 +67,46 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
         outline,
         outlineOffset: 1,
         background,
-        // Give empty canvases enough room to show the placeholder
+        // Keep a roomy target only for empty canvases; otherwise let block
+        // content define height so background fills the whole visible block.
         minHeight: showPlaceholder ? 80 : undefined,
+        minWidth: showPlaceholder ? 28 : undefined,
         transition: "outline 0.1s, background 0.1s",
       }}
     >
+      {/* ── Persistent chrome label ───────────────────────────────────────── */}
+      {showChrome && (
+        <div
+          onMouseDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            actions.selectNode(id);
+          }}
+          style={{
+            position: "absolute",
+            top: 2,
+            left: 2,
+            zIndex: 999,
+            borderRadius: 4,
+            fontSize: 9,
+            letterSpacing: "0.04em",
+            lineHeight: 1.2,
+            padding: "2px 4px",
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+            textTransform: "uppercase",
+            background: chromeLabelBackground,
+            color: chromeLabelColor,
+            pointerEvents: "auto",
+            cursor: "pointer",
+            userSelect: "none",
+            opacity: isSelected || isHovered ? 1 : 0.72,
+          }}
+          title={`Select ${displayName ?? "block"}`}
+        >
+          {displayName ?? "Block"}
+        </div>
+      )}
+
       {/* ── Empty-canvas placeholder ──────────────────────────────────── */}
       {showPlaceholder && (
         <div

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useNode } from "@craftjs/core";
-import { TextField, ColorField, FieldStack } from "@/components/editor/fields";
+import { RemSliderField, ColorField, FieldStack } from "@/components/editor/fields";
 
 export type PrimaryBoxProps = {
   padding?: string;
@@ -44,8 +44,8 @@ export const PrimaryBox = ({
 
 const PrimaryBoxSettings = () => (
   <FieldStack>
-    <TextField label="Padding" propKey="padding" />
-    <TextField label="Gap" propKey="gap" />
+    <RemSliderField label="Padding" propKey="padding" min={0} max={10} step={0.25} fallback={1.5} />
+    <RemSliderField label="Gap" propKey="gap" min={0} max={6} step={0.25} fallback={0.5} />
     <ColorField label="Background" propKey="background" />
     <ColorField label="Text color" propKey="color" />
   </FieldStack>

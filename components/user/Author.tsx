@@ -4,6 +4,7 @@ import { useNode } from "@craftjs/core";
 import {
   TextField,
   BooleanField,
+  PxSliderField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -84,7 +85,7 @@ const AuthorSettings = () => (
     <TextField label="Name" propKey="name" />
     <TextField label="Avatar URL" propKey="avatar" />
     <TextField label="Email" propKey="email" />
-    <TextField label="Avatar size" propKey="avatarSize" />
+    <PxSliderField label="Avatar size" propKey="avatarSize" min={16} max={192} step={2} fallback={32} />
     <BooleanField label="Show email" propKey="showEmail" />
   </FieldStack>
 );

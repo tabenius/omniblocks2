@@ -1,0 +1,18 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/contacts/route": "app-edge-has-no-entrypoint",
+  "/api/email/send/route": "app-edge-has-no-entrypoint",
+  "/api/r2/images/route": "app-edge-has-no-entrypoint",
+  "/api/r2/object/route": "app-edge-has-no-entrypoint",
+  "/api/r2/startup/route": "app-edge-has-no-entrypoint",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js",
+  "/preview-email/[...slug]/page": "app/preview-email/[...slug]/page.js",
+  "/preview-email/page": "app/preview-email/page.js",
+  "/preview/[...slug]/page": "app/preview/[...slug]/page.js",
+  "/preview/page": "app/preview/page.js",
+  "/slug/[...slug]/page": "app/slug/[...slug]/page.js",
+  "/slug/edit/[...slug]/page": "app/slug/edit/[...slug]/page.js",
+  "/style-editor/page": "app/style-editor/page.js"
+}

@@ -14,6 +14,13 @@ import { Quote } from "@/components/user/Quote";
 import { Diagram } from "@/components/user/Diagram";
 import { Audio } from "@/components/user/Audio";
 import { Template } from "@/components/user/Template";
+import { Event } from "@/components/user/Event";
+import { Video } from "@/components/user/Video";
+import { Form } from "@/components/user/Form";
+import { Name } from "@/components/user/Name";
+import { Email } from "@/components/user/Email";
+import { Textarea } from "@/components/user/Textarea";
+import { Button } from "@/components/user/Button";
 
 export const resolver = {
   Container,
@@ -32,4 +39,11 @@ export const resolver = {
   Diagram,
   Audio,
   Template,
+  Event,
+  Video,
+  Form,
+  Name,
+  Email,
+  Textarea,
+  Button,
 };

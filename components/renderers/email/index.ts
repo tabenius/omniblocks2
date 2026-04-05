@@ -6,7 +6,13 @@ import {
   AuthorEmail,
   DiagramEmail,
   AudioEmail,
+  VideoEmail,
   TemplateEmail,
+  EventEmail,
+  NameEmail,
+  EmailEmail,
+  TextareaEmail,
+  ButtonEmail,
 } from "./atoms";
 import {
   ContainerEmail,
@@ -15,6 +21,7 @@ import {
   PrimaryBoxEmail,
   QuoteEmail,
   AssetEmail,
+  FormEmail,
 } from "./containers";
 import { LayoutBlockEmail, MasonryEmail } from "./layouts";
 
@@ -29,9 +36,16 @@ export const emailResolver: Record<
   Author: AuthorEmail,
   Diagram: DiagramEmail,
   Audio: AudioEmail,
+  Video: VideoEmail,
+  Event: EventEmail,
   Template: TemplateEmail,
+  Name: NameEmail,
+  Email: EmailEmail,
+  Textarea: TextareaEmail,
+  Button: ButtonEmail,
   Container: ContainerEmail,
   TextBlock: TextBlockEmail,
+  Form: FormEmail,
   Hero: HeroEmail,
   PrimaryBox: PrimaryBoxEmail,
   Quote: QuoteEmail,
