@@ -42,13 +42,13 @@ export const PreviewEmail = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => navigator.clipboard.writeText(html)}
-                  className="text-xs px-2 py-1 border rounded hover:bg-gray-50"
+                  className="text-xs px-2 py-1 border border-[var(--color-border)] rounded bg-[var(--color-secondary)] hover:bg-[var(--color-surface)] text-[var(--color-foreground)]"
                 >
                   Copy HTML
                 </button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="text-xs px-2 py-1 border rounded hover:bg-gray-50"
+                  className="text-xs px-2 py-1 border border-[var(--color-border)] rounded bg-[var(--color-secondary)] hover:bg-[var(--color-surface)] text-[var(--color-foreground)]"
                 >
                   Close
                 </button>

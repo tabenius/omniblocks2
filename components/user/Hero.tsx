@@ -46,7 +46,7 @@ export const Hero = ({
               ? "flex-end"
               : "flex-start",
       }}
-      className="border border-dashed border-purple-300"
+      className=""
     >
       {children}
     </section>

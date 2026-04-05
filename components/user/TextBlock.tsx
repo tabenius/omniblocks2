@@ -32,7 +32,7 @@ export const TextBlock = ({
         flexDirection: "column",
         gap,
       }}
-      className="border border-dashed border-gray-300"
+      className=""
     >
       {children}
     </div>

@@ -3,9 +3,11 @@ import React from "react";
 import { useNode } from "@craftjs/core";
 
 const labelCls = "block space-y-1";
-const spanCls = "text-xs text-gray-600";
+const spanCls  = "text-xs text-[var(--color-muted-foreground)]";
 const inputCls =
-  "w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-gray-400";
+  "w-full border border-[var(--color-border)] rounded px-2 py-1 text-sm " +
+  "bg-[var(--color-muted)] text-[var(--color-foreground)] " +
+  "focus:outline-none focus:border-[var(--color-primary)]";
 
 type Parse<T> = (raw: string) => T;
 
@@ -92,7 +94,7 @@ export function ColorField({
           type="color"
           value={/^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(value ?? "") ? value : "#000000"}
           onChange={(e) => set(e.target.value)}
-          className="w-8 h-8 border border-gray-200 rounded cursor-pointer"
+          className="w-8 h-8 border border-[var(--color-border)] rounded cursor-pointer"
         />
       </div>
     </label>
@@ -108,7 +110,7 @@ export function BooleanField({
 }) {
   const [value, set] = useProp<boolean>(propKey);
   return (
-    <label className="flex items-center gap-2 text-sm text-gray-700">
+    <label className="flex items-center gap-2 text-sm text-[var(--color-foreground)]">
       <input
         type="checkbox"
         checked={!!value}

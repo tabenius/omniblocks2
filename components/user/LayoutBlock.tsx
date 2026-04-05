@@ -35,7 +35,7 @@ export const LayoutBlock = ({
         padding,
         background,
       }}
-      className="border border-dashed border-blue-300"
+      className=""
     >
       {columnKeys.map((key) => (
         <Element key={key} id={key} is={Container} canvas />

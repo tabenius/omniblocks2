@@ -34,7 +34,7 @@ export const Masonry = ({
         columnGap: gap,
         padding,
       }}
-      className="border border-dashed border-pink-300 [&>*]:mb-[var(--masonry-gap)] [&>*]:break-inside-avoid"
+      className="[&>*]:mb-[var(--masonry-gap)] [&>*]:break-inside-avoid"
     >
       <style>{`[style*="column-count"] > * { margin-bottom: ${gap}; break-inside: avoid; }`}</style>
       {children}
