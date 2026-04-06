@@ -6,6 +6,7 @@ import {
   RemSliderField,
   UnitlessSliderField,
   ColorField,
+  BackgroundField,
   AlignField,
   FieldStack,
 } from "@/components/editor/fields";
@@ -15,6 +16,7 @@ export type ParagraphProps = {
   fontSize?: string;
   lineHeight?: string;
   color?: string;
+  background?: string;
   textAlign?: "left" | "center" | "right";
 };
 
@@ -23,6 +25,7 @@ export const Paragraph = ({
   fontSize = "var(--text-base)",
   lineHeight = "var(--line-height-base, 1.5)",
   color = "var(--color-muted-foreground)",
+  background = "transparent",
   textAlign = "left",
 }: ParagraphProps) => {
   const {
@@ -38,6 +41,7 @@ export const Paragraph = ({
         fontSize,
         lineHeight,
         color,
+        background,
         textAlign,
         margin: 0,
         width: "100%",
@@ -55,6 +59,7 @@ const ParagraphSettings = () => (
     <RemSliderField label="Font size" propKey="fontSize" min={0.75} max={4} step={0.125} fallback={1} />
     <UnitlessSliderField label="Line height" propKey="lineHeight" min={1} max={2.4} step={0.05} fallback={1.5} />
     <ColorField label="Color" propKey="color" />
+    <BackgroundField />
     <AlignField />
   </FieldStack>
 );
@@ -66,6 +71,7 @@ Paragraph.craft = {
     fontSize: "var(--text-base)",
     lineHeight: "var(--line-height-base, 1.5)",
     color: "var(--color-muted-foreground)",
+    background: "transparent",
     textAlign: "left",
   },
   related: { settings: ParagraphSettings },

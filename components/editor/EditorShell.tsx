@@ -1,12 +1,14 @@
 "use client";
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Editor, Frame, Element, useEditor } from "@craftjs/core";
 import { resolver } from "@/lib/resolver";
 import { Container } from "@/components/user/Container";
 import { Heading } from "@/components/user/Heading";
 import { Paragraph } from "@/components/user/Paragraph";
 import { Toolbox } from "./Toolbox";
+import { BlockTreeTab } from "./BlockTreeTab";
 import { SettingsPanel } from "./SettingsPanel";
 import { type ViewportMode } from "./PreviewEmail";
 import { RenderNode } from "./RenderNode";
@@ -15,7 +17,9 @@ import { SourceCodeTab } from "./SourceCodeTab";
 import { TemplatesTab } from "./TemplatesTab";
 import { DocumentsPanel } from "./DocumentsPanel";
 import { ExportHtmlPanel } from "./ExportHtmlPanel";
-import { STYLE_STORAGE_KEY, STORAGE_KEY } from "@/lib/editorStorage";
+import { ContactsTab } from "./ContactsTab";
+import { ContentThemeVarsProvider } from "./fields";
+import { CONTENT_THEME_STORAGE_KEY, STYLE_STORAGE_KEY, STORAGE_KEY } from "@/lib/editorStorage";
 import { readSavedDocuments } from "@/lib/documentStore";
 import { safeJsonResponse } from "@/lib/safeJson";
 import {
@@ -23,19 +27,31 @@ import {
   STARTUP_GOOGLE_FONTS_CACHE_KEY,
   STARTUP_IMAGES_CACHE_KEY,
   sanitizeStartupAssetsPayload,
+  type StartupAssetsPayload,
   type StartupTemplate,
 } from "@/lib/startupAssets";
 
 type ContentTheme = "content-light" | "content-dark";
 export type ToolbarTab = "settings" | "send" | "export-source" | "save-load" | "style";
 type PrimaryPanelTab = Exclude<ToolbarTab, "style">;
+type LeftPanelTab = "blocks" | "tree";
 const VIEWPORT_STORAGE_KEY = "omnieditor-viewport-mode";
 type EditorShellMode = "full" | "style-only";
 type AutoSaveNotice = {
   level: "warning" | "error";
   message: string;
 };
+type AdminSession = {
+  role: "admin";
+  email: string;
+};
+type AdminSessionPayload = {
+  authenticated?: boolean;
+  session?: AdminSession | null;
+};
 const AUTOSAVE_WARNING_BYTES = 3_500_000;
+const PROJECT_DOCS_URL =
+  process.env.NEXT_PUBLIC_OMNILAND_DOCS_URL || "https://ragbaz.xyz/docs/en/omniland-editor";
 
 type ThemeStyleTokens = {
   background: string;
@@ -556,6 +572,23 @@ const CopyIcon = () => (
   >
     <rect x="9" y="9" width="13" height="13" rx="2" />
     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
@@ -1126,14 +1159,60 @@ export default function EditorShell({
   const [startupLoading, setStartupLoading] = React.useState(true);
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [rightPanelOpen, setRightPanelOpen] = React.useState(false);
+  const [leftPanelTab, setLeftPanelTab] = React.useState<LeftPanelTab>("blocks");
   const [autoSaveNotice, setAutoSaveNotice] = React.useState<AutoSaveNotice | null>(null);
   const styleOnly = mode === "style-only";
+  const pathname = usePathname();
+  const authMenuRef = React.useRef<HTMLDivElement | null>(null);
+  const [adminSession, setAdminSession] = React.useState<AdminSession | null>(null);
+  const [authLoading, setAuthLoading] = React.useState(true);
+  const [authMenuOpen, setAuthMenuOpen] = React.useState(false);
+  const isAuthenticated = Boolean(adminSession);
+  const canUseRestrictedFeatures = isAuthenticated;
+  const loginHref = React.useMemo(() => {
+    const fallback = pathname || "/";
+    if (typeof window === "undefined") {
+      return `/admin/login?next=${encodeURIComponent(fallback)}`;
+    }
+    const current = `${window.location.pathname}${window.location.search}` || fallback;
+    return `/admin/login?next=${encodeURIComponent(current)}`;
+  }, [pathname]);
 
   const handleAutoSaveNotice = React.useCallback((next: AutoSaveNotice | null) => {
     setAutoSaveNotice((prev) => {
       if (prev?.level === next?.level && prev?.message === next?.message) return prev;
       return next;
     });
+  }, []);
+
+  const refreshAdminSession = React.useCallback(async () => {
+    setAuthLoading(true);
+    try {
+      const response = await fetch("/api/admin/session", { cache: "no-store" });
+      const payload = await safeJsonResponse<AdminSessionPayload>(response);
+      const session =
+        response.ok && payload?.authenticated && payload.session?.role === "admin"
+          ? payload.session
+          : null;
+      setAdminSession(session);
+    } catch {
+      setAdminSession(null);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
+  const signOutAdmin = React.useCallback(async () => {
+    try {
+      await fetch("/api/admin/logout", {
+        method: "POST",
+      });
+    } catch {
+      // Ignore sign-out request failures and clear local session state.
+    } finally {
+      setAdminSession(null);
+      setAuthMenuOpen(false);
+    }
   }, []);
 
   const toggleLeftPanel = () => {
@@ -1151,6 +1230,27 @@ export default function EditorShell({
       return next;
     });
   };
+
+  React.useEffect(() => {
+    void refreshAdminSession();
+  }, [refreshAdminSession]);
+
+  React.useEffect(() => {
+    const onPointerDown = (event: MouseEvent) => {
+      if (!authMenuRef.current) return;
+      if (authMenuRef.current.contains(event.target as Node)) return;
+      setAuthMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
+
+  React.useEffect(() => {
+    if (canUseRestrictedFeatures) return;
+    if (toolbarTab === "send") {
+      setToolbarTab("settings");
+    }
+  }, [canUseRestrictedFeatures, toolbarTab]);
 
   React.useEffect(() => {
     const saved = localStorage.getItem(STYLE_STORAGE_KEY);
@@ -1211,11 +1311,30 @@ export default function EditorShell({
 
   React.useEffect(() => {
     try {
+      const raw = localStorage.getItem(CONTENT_THEME_STORAGE_KEY);
+      if (raw === "content-light" || raw === "content-dark") {
+        setContentTheme(raw);
+      }
+    } catch {
+      // ignore localStorage read errors
+    }
+  }, []);
+
+  React.useEffect(() => {
+    try {
       localStorage.setItem(VIEWPORT_STORAGE_KEY, viewportMode);
     } catch {
       // ignore localStorage write errors
     }
   }, [viewportMode]);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(CONTENT_THEME_STORAGE_KEY, contentTheme);
+    } catch {
+      // ignore localStorage write errors
+    }
+  }, [contentTheme]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -1379,41 +1498,71 @@ export default function EditorShell({
   React.useEffect(() => {
     let cancelled = false;
 
-    const applyAssets = (assets: unknown) => {
-      const normalized = sanitizeStartupAssetsPayload(assets);
+    const applyAssets = (normalized: StartupAssetsPayload, persist: boolean) => {
       if (cancelled) return;
       setStartupTemplates(normalized.templates);
-      try {
-        localStorage.setItem(STARTUP_ASSETS_CACHE_KEY, JSON.stringify(normalized));
-        localStorage.setItem(STARTUP_IMAGES_CACHE_KEY, JSON.stringify(normalized.images));
-        localStorage.setItem(
-          STARTUP_GOOGLE_FONTS_CACHE_KEY,
-          JSON.stringify(normalized.googleFontData ?? null),
-        );
-      } catch {
-        // ignore localStorage errors
+      if (persist) {
+        try {
+          localStorage.setItem(STARTUP_ASSETS_CACHE_KEY, JSON.stringify(normalized));
+          localStorage.setItem(STARTUP_IMAGES_CACHE_KEY, JSON.stringify(normalized.images));
+          localStorage.setItem(
+            STARTUP_GOOGLE_FONTS_CACHE_KEY,
+            JSON.stringify(normalized.googleFontData ?? null),
+          );
+        } catch {
+          // ignore localStorage errors
+        }
       }
       setStartupLoading(false);
     };
 
+    const toTimestamp = (value: string): number => {
+      const parsed = Date.parse(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const shouldReplaceCachedAssets = (
+      cached: StartupAssetsPayload | null,
+      remote: StartupAssetsPayload,
+      source: string | undefined,
+    ): boolean => {
+      if (!cached) return true;
+      // Treat fallback response as non-authoritative when we already have cached assets.
+      if (source !== "r2") return false;
+      if (remote.version !== cached.version) return remote.version > cached.version;
+      return toTimestamp(remote.updatedAt) > toTimestamp(cached.updatedAt);
+    };
+
     const load = async () => {
       try {
+        let cachedAssets: StartupAssetsPayload | null = null;
         const cachedRaw = localStorage.getItem(STARTUP_ASSETS_CACHE_KEY);
         if (cachedRaw) {
           try {
-            applyAssets(JSON.parse(cachedRaw));
+            cachedAssets = sanitizeStartupAssetsPayload(JSON.parse(cachedRaw));
+            applyAssets(cachedAssets, false);
           } catch {
             // ignore bad cache
           }
         }
 
         const response = await fetch("/api/r2/startup", { cache: "no-store" });
-        const json = await safeJsonResponse<{ ok?: boolean; assets?: unknown }>(response);
+        const json = await safeJsonResponse<{
+          ok?: boolean;
+          source?: string;
+          assets?: unknown;
+        }>(response);
         if (!response.ok || !json?.ok) {
           if (!cancelled) setStartupLoading(false);
           return;
         }
-        applyAssets(json.assets);
+        const remoteAssets = sanitizeStartupAssetsPayload(json.assets);
+        if (shouldReplaceCachedAssets(cachedAssets, remoteAssets, json.source)) {
+          applyAssets(remoteAssets, true);
+          return;
+        }
+        if (!cachedAssets) applyAssets(remoteAssets, true);
+        else if (!cancelled) setStartupLoading(false);
       } catch {
         if (!cancelled) setStartupLoading(false);
       }
@@ -1457,9 +1606,65 @@ export default function EditorShell({
 
   return (
     <div
-      className="flex min-h-screen flex-col lg:h-screen lg:flex-row"
+      className="relative flex min-h-screen flex-col lg:h-screen lg:flex-row"
       style={{ fontFamily: "var(--font-default)" }}
     >
+      <div ref={authMenuRef} className="fixed right-3 top-3 z-[60]">
+        <button
+          type="button"
+          onClick={() => setAuthMenuOpen((current) => !current)}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] shadow"
+          aria-label="Open account menu"
+          aria-expanded={authMenuOpen}
+        >
+          <UserIcon />
+        </button>
+        {authMenuOpen ? (
+          <div className="absolute right-0 top-full mt-2 w-64 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-xl">
+            {authLoading ? (
+              <div className="px-2 py-1 text-xs text-[var(--color-muted-foreground)]">
+                Checking session...
+              </div>
+            ) : isAuthenticated && adminSession ? (
+              <div className="space-y-2">
+                <div className="rounded border border-[var(--color-border)] bg-[var(--color-muted)] px-2 py-1.5 text-xs">
+                  Signed in as <span className="font-medium">{adminSession.email}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={signOutAdmin}
+                  className="w-full rounded border border-[var(--color-border)] bg-[var(--color-secondary)] px-2 py-1.5 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-muted)]"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="px-2 py-1 text-xs text-[var(--color-muted-foreground)]">
+                  Sign in to unlock contacts, R2 images, save/load, and email sending.
+                </div>
+                <Link
+                  href={loginHref}
+                  onClick={() => setAuthMenuOpen(false)}
+                  className="block w-full rounded border border-[var(--color-border)] bg-[var(--color-primary)] px-2 py-1.5 text-center text-xs text-[var(--color-primary-foreground)] hover:opacity-90"
+                >
+                  Sign in
+                </Link>
+              </div>
+            )}
+            <div className="mt-2 border-t border-[var(--color-border)] pt-2">
+              <a
+                href={PROJECT_DOCS_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="block w-full rounded border border-[var(--color-border)] bg-[var(--color-secondary)] px-2 py-1.5 text-center text-xs text-[var(--color-foreground)] hover:bg-[var(--color-muted)]"
+              >
+                Project Docs
+              </a>
+            </div>
+          </div>
+        ) : null}
+      </div>
       {!styleOnly ? (
         <button
           type="button"
@@ -1479,6 +1684,7 @@ export default function EditorShell({
         {rightPanelOpen ? "Close" : "Panels"}
       </button>
 
+      <ContentThemeVarsProvider value={exportThemeVariables}>
       <Editor resolver={resolver} onRender={RenderNode}>
         <AutoSaveLoader initialDocSlug={initialDocSlug} onNoticeChange={handleAutoSaveNotice} />
 
@@ -1506,7 +1712,32 @@ export default function EditorShell({
             >
               Blocks
             </h2>
-            <Toolbox />
+            <div className="grid grid-cols-2 rounded-md overflow-hidden border border-[var(--color-border)]">
+              {([
+                { id: "blocks", label: "Blocks" },
+                { id: "tree", label: "Tree" },
+              ] as Array<{ id: LeftPanelTab; label: string }>).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setLeftPanelTab(tab.id)}
+                  className="px-2 py-1.5 text-[11px] uppercase tracking-wide transition-colors"
+                  style={{
+                    background:
+                      leftPanelTab === tab.id
+                        ? "var(--color-primary)"
+                        : "var(--color-secondary)",
+                    color:
+                      leftPanelTab === tab.id
+                        ? "var(--color-primary-foreground)"
+                        : "var(--color-muted-foreground)",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            {leftPanelTab === "blocks" ? <Toolbox /> : <BlockTreeTab />}
           </aside>
         ) : null}
 
@@ -1529,7 +1760,7 @@ export default function EditorShell({
         {/* Right sidebar — editor chrome */}
         <aside
           data-theme="editor"
-          className={`${rightPanelOpen ? "fixed inset-0 z-50 flex w-screen shadow-2xl" : "hidden"} lg:static lg:inset-auto lg:z-auto lg:flex w-screen ${styleOnly ? "lg:w-96" : "lg:w-72"} border-t lg:border-t-0 lg:border-l border-[var(--color-border)] p-4 overflow-y-auto flex-col gap-4`}
+          className={`${rightPanelOpen ? "fixed inset-0 z-50 flex w-screen shadow-2xl" : "hidden"} lg:static lg:inset-auto lg:z-auto lg:flex w-screen ${styleOnly ? "lg:w-96" : "lg:w-72"} border-t lg:border-t-0 lg:border-l border-[var(--color-border)] p-4 flex-col gap-4 min-h-0`}
         >
           <div className="lg:hidden flex items-center justify-between mb-1">
             <div className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)]">
@@ -1618,72 +1849,106 @@ export default function EditorShell({
             <>
               <ViewportModeToggle value={viewportMode} onChange={setViewportMode} />
               <ContentThemeToggle value={contentTheme} onChange={setContentTheme} />
-              <section className="border border-[var(--color-border)] rounded-md overflow-hidden">
+              <section className="border border-[var(--color-border)] rounded-md overflow-hidden flex-1 min-h-0 flex flex-col">
                 <div className="grid grid-cols-2">
                   {([
                     { id: "settings", label: "Block Settings" },
-                    { id: "send", label: "Send Email" },
+                    {
+                      id: "send",
+                      label: "Send Email",
+                      disabled: !canUseRestrictedFeatures,
+                      tooltip: "Login required",
+                    },
                     { id: "export-source", label: "Export + Source" },
                     { id: "save-load", label: "Save + Load" },
-                  ] as Array<{ id: PrimaryPanelTab; label: string }>).map((tab) => (
+                  ] as Array<{
+                    id: PrimaryPanelTab;
+                    label: string;
+                    disabled?: boolean;
+                    tooltip?: string;
+                  }>).map((tab) => (
                     <button
                       key={tab.id}
-                      onClick={() => setToolbarTab(tab.id)}
+                      onClick={() => {
+                        if (tab.disabled) return;
+                        setToolbarTab(tab.id);
+                      }}
+                      disabled={tab.disabled}
+                      title={tab.disabled ? tab.tooltip || "Login required" : undefined}
                       className="px-2 py-2 text-[10px] sm:text-xs uppercase tracking-wide transition-colors border-b border-[var(--color-border)]"
                       style={{
                         background:
-                          toolbarTab === tab.id
-                            ? "var(--color-primary)"
-                            : "var(--color-secondary)",
+                          tab.disabled
+                            ? "var(--color-muted)"
+                            : toolbarTab === tab.id
+                              ? "var(--color-primary)"
+                              : "var(--color-secondary)",
                         color:
-                          toolbarTab === tab.id
-                            ? "var(--color-primary-foreground)"
-                            : "var(--color-muted-foreground)",
+                          tab.disabled
+                            ? "var(--color-muted-foreground)"
+                            : toolbarTab === tab.id
+                              ? "var(--color-primary-foreground)"
+                              : "var(--color-muted-foreground)",
+                        opacity: tab.disabled ? 0.6 : 1,
+                        cursor: tab.disabled ? "not-allowed" : "pointer",
                       }}
                     >
                       {tab.label}
                     </button>
                   ))}
                 </div>
-                <div className="p-3 bg-[var(--color-muted)]">
-                  {toolbarTab === "settings" ? (
-                    <div className="space-y-2">
-                      <div className="text-[11px] uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                        Selected Block
-                      </div>
-                      <SettingsPanel />
-                    </div>
-                  ) : toolbarTab === "send" ? (
-                    <ExportHtmlPanel
-                      filenameBase={initialDocSlug || "document"}
-                      themeVariables={exportThemeVariables}
-                      showExportsSection={false}
-                      showSendSection
-                    />
-                  ) : toolbarTab === "export-source" ? (
-                    <div className="space-y-3">
-                      <ExportHtmlPanel
-                        filenameBase={initialDocSlug || "document"}
-                        themeVariables={exportThemeVariables}
-                        showExportsSection
-                        showSendSection={false}
-                      />
-                      <CopySourceButton />
-                      <SourceCodeTab />
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <DocumentsPanel
-                        initialName={initialDocSlug ? initialDocSlug.replaceAll("-", " ") : ""}
-                      />
-                      <section className="rounded border border-[var(--color-border)] bg-[var(--color-muted)] p-3 space-y-3">
-                        <div className="text-xs uppercase tracking-wide text-[var(--color-accent)]">
-                          Examples
+                <div className="p-3 bg-[var(--color-muted)] flex-1 min-h-0">
+                  <div className="h-full overflow-y-auto pr-1">
+                    {toolbarTab === "settings" ? (
+                      <div className="space-y-2">
+                        <div className="text-[11px] uppercase tracking-wide text-[var(--color-muted-foreground)]">
+                          Selected Block
                         </div>
-                        <TemplatesTab templates={startupTemplates} loading={startupLoading} />
-                      </section>
-                    </div>
-                  )}
+                        <SettingsPanel />
+                      </div>
+                    ) : toolbarTab === "send" ? (
+                      canUseRestrictedFeatures ? (
+                        <div className="space-y-3">
+                          <ExportHtmlPanel
+                            filenameBase={initialDocSlug || "document"}
+                            themeVariables={exportThemeVariables}
+                            showExportsSection={false}
+                            showSendSection
+                          />
+                          <ContactsTab />
+                        </div>
+                      ) : (
+                        <section className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-muted-foreground)]">
+                          Login required to access email sending and contacts.
+                        </section>
+                      )
+                    ) : toolbarTab === "export-source" ? (
+                      <div className="space-y-3">
+                        <ExportHtmlPanel
+                          filenameBase={initialDocSlug || "document"}
+                          themeVariables={exportThemeVariables}
+                          showExportsSection
+                          showSendSection={false}
+                        />
+                        <CopySourceButton />
+                        <SourceCodeTab />
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <DocumentsPanel
+                          initialName={initialDocSlug ? initialDocSlug.replaceAll("-", " ") : ""}
+                          canSave={canUseRestrictedFeatures}
+                          saveDisabledReason="Login required"
+                        />
+                        <section className="rounded border border-[var(--color-border)] bg-[var(--color-muted)] p-3 space-y-3">
+                          <div className="text-xs uppercase tracking-wide text-[var(--color-accent)]">
+                            Examples
+                          </div>
+                          <TemplatesTab templates={startupTemplates} loading={startupLoading} />
+                        </section>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
             </>
@@ -1724,6 +1989,7 @@ export default function EditorShell({
           )}
         </aside>
       </Editor>
+      </ContentThemeVarsProvider>
     </div>
   );
 }

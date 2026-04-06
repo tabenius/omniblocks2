@@ -5,8 +5,6 @@ import {
   sanitizeStartupAssetsPayload,
 } from "@/lib/startupAssets";
 
-export const runtime = "edge";
-
 function jsonResponse(payload: unknown, init?: ResponseInit): Response {
   return Response.json(payload, init);
 }

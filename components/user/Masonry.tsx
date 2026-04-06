@@ -4,6 +4,7 @@ import { useNode } from "@craftjs/core";
 import {
   RemSliderField,
   SelectField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -11,6 +12,7 @@ export type MasonryProps = {
   columns?: number;
   gap?: string;
   padding?: string;
+  background?: string;
   children?: React.ReactNode;
 };
 
@@ -18,6 +20,7 @@ export const Masonry = ({
   columns = 3,
   gap = "12px",
   padding = "8px",
+  background = "transparent",
   children,
 }: MasonryProps) => {
   const {
@@ -40,6 +43,7 @@ export const Masonry = ({
         columnCount: safeColumns,
         columnGap: gap,
         padding,
+        background,
         minHeight: 80,
         borderRadius: 8,
         outline: selected
@@ -67,6 +71,7 @@ const MasonrySettings = () => (
     />
     <RemSliderField label="Gap" propKey="gap" min={0} max={4} step={0.25} fallback={0.75} />
     <RemSliderField label="Padding" propKey="padding" min={0} max={8} step={0.25} fallback={0.5} />
+    <BackgroundField />
   </FieldStack>
 );
 
@@ -76,6 +81,7 @@ Masonry.craft = {
     columns: 3,
     gap: "12px",
     padding: "8px",
+    background: "transparent",
   },
   related: { settings: MasonrySettings },
   rules: {

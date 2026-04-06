@@ -236,6 +236,7 @@ function renderNode(
             fontWeight: "700",
             color: asString(props.color, "var(--color-foreground)"),
             textAlign: asString(props.textAlign, "left"),
+            background: "transparent",
             margin: "0",
           }),
         },

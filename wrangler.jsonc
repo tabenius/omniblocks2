@@ -14,7 +14,13 @@
     "UPLOAD_BACKEND": "r2",
     "S3_BUCKET_NAME": "sofiacerne",
     "S3_REGION": "auto",
-    "S3_PUBLIC_URL": "https://pub-e84fd23dec9840a39cb1c4ae26afe418.r2.dev"
+    "S3_PUBLIC_URL": "https://pub-e84fd23dec9840a39cb1c4ae26afe418.r2.dev",
+    "CF_R2_ENDPOINT": "https://cb4966b6dcf9f7041be81b1d1092f792.r2.cloudflarestorage.com",
+    "CF_R2_PUBLIC_URL": "https://pub-e84fd23dec9840a39cb1c4ae26afe418.r2.dev",
+    "R2_PAGES_PREFIX": "omniland-",
+    "R2_STARTUP_ASSETS_KEY": "omniland-bootstrap/startup-assets.json",
+    "RESEND_FROM": "xtas.nu@ragbaz.xyz",
+    "RESEND_FROM_EMAIL": "xtas.nu@ragbaz.xyz"
   },
   "r2_buckets": [
     {

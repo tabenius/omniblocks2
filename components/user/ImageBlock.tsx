@@ -7,6 +7,7 @@ import {
   PxSliderField,
   RemSliderField,
   SelectField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 import { R2ImageSourceField } from "@/components/editor/R2ImageSourceField";
@@ -17,6 +18,7 @@ export type ImageBlockProps = {
   width?: string;
   maxWidth?: string;
   borderRadius?: string;
+  background?: string;
   align?: "left" | "center" | "right";
 };
 
@@ -26,6 +28,7 @@ export const ImageBlock = ({
   width = "100%",
   maxWidth = "800px",
   borderRadius = "0px",
+  background = "transparent",
   align = "center",
 }: ImageBlockProps) => {
   const {
@@ -40,7 +43,7 @@ export const ImageBlock = ({
       ref={(ref: HTMLDivElement | null) => {
         if (ref) connect(drag(ref));
       }}
-      style={{ display: "flex", justifyContent: justify, width: "100%" }}
+      style={{ display: "flex", justifyContent: justify, width: "100%", background }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -80,6 +83,7 @@ const ImageBlockSettings = () => {
       <PercentSliderField label="Width" propKey="width" min={10} max={100} step={1} fallback={100} />
       <PxSliderField label="Max width" propKey="maxWidth" min={120} max={1920} step={10} fallback={800} />
       <RemSliderField label="Border radius" propKey="borderRadius" min={0} max={4} step={0.125} fallback={0} />
+      <BackgroundField />
       <SelectField
         label="Align"
         propKey="align"
@@ -97,6 +101,7 @@ ImageBlock.craft = {
     width: "100%",
     maxWidth: "800px",
     borderRadius: "0px",
+    background: "transparent",
     align: "center",
   },
   related: { settings: ImageBlockSettings },

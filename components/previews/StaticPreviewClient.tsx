@@ -3,7 +3,12 @@
 import React from "react";
 import { buildStaticHtmlDocument } from "@/lib/htmlExport";
 import { PreviewLinks } from "@/components/previews/PreviewLinks";
-import { parseSerializedNodes, readSerializedContent } from "@/components/previews/storage";
+import {
+  parseSerializedNodes,
+  readPreviewThemeMode,
+  readPreviewThemeVariables,
+  readSerializedContent,
+} from "@/components/previews/storage";
 
 type StaticNodes = Parameters<typeof buildStaticHtmlDocument>[0];
 
@@ -14,9 +19,12 @@ export const StaticPreviewClient = ({ slugParam }: { slugParam?: string }) => {
   React.useEffect(() => {
     const parsed = parseSerializedNodes(readSerializedContent(slugParam));
     if (parsed) {
+      const mode = readPreviewThemeMode();
+      const themeVariables = readPreviewThemeVariables(mode);
       setHtml(
         buildStaticHtmlDocument(parsed as StaticNodes, {
           title: slugParam || "document-preview",
+          themeVariables,
         }),
       );
     } else {
@@ -47,4 +55,3 @@ export const StaticPreviewClient = ({ slugParam }: { slugParam?: string }) => {
     </div>
   );
 };
-

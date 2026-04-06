@@ -36,6 +36,7 @@ export type R2BucketLike = {
     },
   ) => Promise<unknown>;
   list: (options?: { prefix?: string; limit?: number }) => Promise<R2ListResultLike>;
+  delete?: (key: string) => Promise<unknown>;
 };
 
 export async function getR2Bucket(): Promise<R2BucketLike | null> {

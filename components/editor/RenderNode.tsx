@@ -34,28 +34,28 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
   const isRoot = id === "ROOT";
   const showChrome = isEnabled && !isRoot;
   const showPlaceholder = showChrome && isCanvas && isEmpty;
-  const showDelete = showChrome && (isSelected || isHovered);
+  const showDelete = showChrome && isSelected && !isDragging;
 
   // ── Border logic ──────────────────────────────────────────────────────────
-  let outline = "none";
+  let chromeBorder: string | undefined;
   let background: string | undefined;
   let chromeLabelBackground = "rgba(15, 23, 42, 0.6)";
   let chromeLabelColor = "rgba(255,255,255,0.92)";
 
   if (showChrome) {
-    outline = isCanvas ? "1px dashed rgba(15, 23, 42, 0.22)" : "1px solid rgba(15, 23, 42, 0.2)";
+    chromeBorder = isCanvas ? "1px dashed rgba(15, 23, 42, 0.22)" : "1px solid rgba(15, 23, 42, 0.2)";
     if (isSelected) {
-      outline = "2px solid #3b82f6";
+      chromeBorder = "2px solid #3b82f6";
       chromeLabelBackground = "#3b82f6";
       chromeLabelColor = "#ffffff";
     } else if (isHovered) {
-      outline = "1.5px dashed #93c5fd";
+      chromeBorder = "1.5px dashed #93c5fd";
       chromeLabelBackground = "rgba(59, 130, 246, 0.82)";
       chromeLabelColor = "#ffffff";
     }
     // When dragging over an empty canvas, add a faint blue wash
     if (isDragging && isCanvas && isEmpty) {
-      outline = "2px dashed #3b82f6";
+      chromeBorder = "2px dashed #3b82f6";
       background = "rgba(59,130,246,0.04)";
     }
   }
@@ -64,16 +64,29 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
     <div
       style={{
         position: "relative",
-        outline,
-        outlineOffset: 1,
         background,
         // Keep a roomy target only for empty canvases; otherwise let block
         // content define height so background fills the whole visible block.
         minHeight: showPlaceholder ? 80 : undefined,
         minWidth: showPlaceholder ? 28 : undefined,
-        transition: "outline 0.1s, background 0.1s",
+        transition: "background 0.1s",
       }}
     >
+      {showChrome && chromeBorder ? (
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            border: chromeBorder,
+            boxSizing: "border-box",
+            pointerEvents: "none",
+            zIndex: 2,
+            transition: "border 0.1s",
+          }}
+        />
+      ) : null}
+
       {/* ── Persistent chrome label ───────────────────────────────────────── */}
       {showChrome && (
         <div
@@ -158,7 +171,12 @@ export const RenderNode = ({ render }: { render: React.ReactElement }) => {
       {/* ── Delete button ────────────────────────────────────────────── */}
       {showDelete && (
         <button
-          onMouseDown={(e) => {
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             actions.delete(id);
           }}

@@ -8,8 +8,10 @@ export type ViewportMode = "mobile" | "desktop";
 
 export const PreviewEmail = ({
   viewportMode,
+  themeVariables = {},
 }: {
   viewportMode: ViewportMode;
+  themeVariables?: Record<string, string>;
 }) => {
   const { query } = useEditor();
   const [html, setHtml] = React.useState<string | null>(null);
@@ -21,7 +23,7 @@ export const PreviewEmail = ({
 
   const run = async () => {
     const serialized = query.getSerializedNodes();
-    const tree = walkEmail(serialized, "ROOT");
+    const tree = walkEmail(serialized, "ROOT", themeVariables);
     const { render } = await import("@react-email/render");
     const out = await render(
       <EmailDocument preview="Editor preview">{tree}</EmailDocument>

@@ -7,6 +7,7 @@ import {
   RemSliderField,
   UnitlessSliderField,
   ColorField,
+  BackgroundField,
   AlignField,
   FieldStack,
 } from "@/components/editor/fields";
@@ -17,6 +18,7 @@ export type AlterParagraphProps = {
   lineHeight?: string;
   fontFamily?: string;
   color?: string;
+  background?: string;
   textAlign?: "left" | "center" | "right";
   fontStyle?: "normal" | "italic";
 };
@@ -27,6 +29,7 @@ export const AlterParagraph = ({
   lineHeight = "var(--line-height-base, 1.5)",
   fontFamily = "var(--font-alternate)",
   color = "var(--color-foreground)",
+  background = "transparent",
   textAlign = "left",
   fontStyle = "italic",
 }: AlterParagraphProps) => {
@@ -44,6 +47,7 @@ export const AlterParagraph = ({
         lineHeight,
         fontFamily,
         color,
+        background,
         textAlign,
         fontStyle,
         margin: 0,
@@ -63,6 +67,7 @@ const AlterParagraphSettings = () => (
     <RemSliderField label="Font size" propKey="fontSize" min={0.75} max={4} step={0.125} fallback={1} />
     <UnitlessSliderField label="Line height" propKey="lineHeight" min={1} max={2.4} step={0.05} fallback={1.5} />
     <ColorField label="Color" propKey="color" />
+    <BackgroundField />
     <AlignField />
     <TextField label="Font style" propKey="fontStyle" />
   </FieldStack>
@@ -76,6 +81,7 @@ AlterParagraph.craft = {
     lineHeight: "var(--line-height-base, 1.5)",
     fontFamily: "var(--font-alternate)",
     color: "var(--color-foreground)",
+    background: "transparent",
     textAlign: "left",
     fontStyle: "italic",
   },

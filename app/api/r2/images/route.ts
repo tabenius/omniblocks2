@@ -1,6 +1,5 @@
 import { getR2Bucket, type R2ObjectLike } from "@/lib/r2Bindings";
-
-export const runtime = "edge";
+import { requireAdmin } from "@/lib/adminRoute";
 
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 const IMAGE_EXT_RE = /\.(png|jpe?g|webp|gif|bmp|avif|svg)$/i;
@@ -53,6 +52,8 @@ function mapR2ObjectToItem(obj: R2ObjectLike, publicUrl: string) {
 }
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if ("error" in auth) return auth.error;
   try {
     const bucket = await getR2Bucket();
     if (!bucket) {
@@ -81,6 +82,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if ("error" in auth) return auth.error;
   try {
     const bucket = await getR2Bucket();
     if (!bucket) {

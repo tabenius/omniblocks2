@@ -53,6 +53,7 @@ export const HeadingEmail = (p: HeadingProps) => (
       fontWeight: 700,
       color: p.color ?? "#0f172a",
       textAlign: p.textAlign ?? "left",
+      background: "transparent",
       margin: "0 0 12px 0",
       fontFamily: "Arial, Helvetica, sans-serif",
     }}

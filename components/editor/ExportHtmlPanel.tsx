@@ -79,10 +79,10 @@ export const ExportHtmlPanel = ({
 
   const buildEmailHtml = React.useCallback(async () => {
     const serialized = query.getSerializedNodes();
-    const tree = walkEmail(serialized, "ROOT");
+    const tree = walkEmail(serialized, "ROOT", themeVariables);
     const { render } = await import("@react-email/render");
     return render(<EmailDocument preview={subject}>{tree}</EmailDocument>);
-  }, [query, subject]);
+  }, [query, subject, themeVariables]);
 
   const copyStaticHtml = async () => {
     try {

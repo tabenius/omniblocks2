@@ -2,6 +2,9 @@
 import React from "react";
 import { useNode } from "@craftjs/core";
 
+const ContentThemeVarsContext = React.createContext<Record<string, string>>({});
+export const ContentThemeVarsProvider = ContentThemeVarsContext.Provider;
+
 const labelCls = "block space-y-1";
 const spanCls  = "text-xs text-[var(--color-muted-foreground)]";
 const inputCls =
@@ -248,6 +251,7 @@ export function BackgroundField({
   propKey?: string;
 } = {}) {
   const [value, set] = useProp<string>(propKey);
+  const contentThemeVars = React.useContext(ContentThemeVarsContext);
   const current = value ?? "";
   const matchedPreset = BACKGROUND_PRESETS.find((p) => p.value === current);
   const isCustom = !matchedPreset && current !== "";
@@ -275,7 +279,8 @@ export function BackgroundField({
               <span
                 className="inline-block w-3 h-3 rounded-sm border border-[var(--color-border)]"
                 style={{
-                  background: preset.swatch,
+                  ...contentThemeVars,
+                  backgroundColor: preset.swatch,
                   backgroundImage:
                     preset.id === "transparent"
                       ? "linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)"
@@ -290,7 +295,7 @@ export function BackgroundField({
         })}
         <button
           type="button"
-          onClick={() => set(isCustom ? current : "#000000")}
+          onClick={() => { if (!isCustom) set(customColor); }}
           title="Custom"
           className="flex items-center gap-1.5 px-1.5 py-1 text-[10px] rounded border transition-colors"
           style={{
@@ -301,7 +306,7 @@ export function BackgroundField({
         >
           <span
             className="inline-block w-3 h-3 rounded-sm border border-[var(--color-border)]"
-            style={{ background: isCustom ? current : "#000000" }}
+            style={{ background: isCustom ? current : customColor }}
           />
           <span className="truncate">Custom</span>
         </button>

@@ -1,6 +1,5 @@
 import { sanitizeExportName, splitEmailList, splitFromAddresses } from "@/lib/emailAddress";
-
-export const runtime = "edge";
+import { requireAdmin } from "@/lib/adminRoute";
 
 function jsonResponse(payload: unknown, init?: ResponseInit): Response {
   return Response.json(payload, init);
@@ -56,13 +55,17 @@ function isSendMode(value: unknown): value is SendMode {
   );
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if ("error" in auth) return auth.error;
   const fromAddresses = resolveFromAddresses();
   const configured = Boolean(process.env.RESEND_API_KEY && fromAddresses.length > 0);
   return jsonResponse({ fromAddresses, configured });
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if ("error" in auth) return auth.error;
   const resendKey = process.env.RESEND_API_KEY || "";
   const configuredFrom = resolveFromAddresses();
   if (!resendKey) {

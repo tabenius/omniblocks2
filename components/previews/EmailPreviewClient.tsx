@@ -5,7 +5,12 @@ import type { SerializedNodes } from "@craftjs/core";
 import { walkEmail } from "@/lib/emailWalker";
 import { EmailDocument } from "@/components/renderers/email/EmailDocument";
 import { PreviewLinks } from "@/components/previews/PreviewLinks";
-import { parseSerializedNodes, readSerializedContent } from "@/components/previews/storage";
+import {
+  parseSerializedNodes,
+  readPreviewThemeMode,
+  readPreviewThemeVariables,
+  readSerializedContent,
+} from "@/components/previews/storage";
 
 export const EmailPreviewClient = ({ slugParam }: { slugParam?: string }) => {
   const [html, setHtml] = React.useState<string>("");
@@ -26,7 +31,9 @@ export const EmailPreviewClient = ({ slugParam }: { slugParam?: string }) => {
           return;
         }
 
-        const tree = walkEmail(parsed as SerializedNodes, "ROOT");
+        const mode = readPreviewThemeMode();
+        const themeVars = readPreviewThemeVariables(mode);
+        const tree = walkEmail(parsed as SerializedNodes, "ROOT", themeVars);
         const { render } = await import("@react-email/render");
         const rendered = await render(
           <EmailDocument preview="Email preview">{tree}</EmailDocument>,

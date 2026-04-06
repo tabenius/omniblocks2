@@ -14,7 +14,7 @@ export type LayoutBlockProps = {
 export const LayoutBlock = ({
   columns = 2,
   gap = "16px",
-  padding = "16px",
+  padding = "0px",
   background = "transparent",
 }: LayoutBlockProps) => {
   const {
@@ -29,6 +29,8 @@ export const LayoutBlock = ({
         if (ref) connect(drag(ref));
       }}
       style={{
+        width: "100%",
+        boxSizing: "border-box",
         display: "grid",
         gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
         gap,
@@ -49,7 +51,7 @@ LayoutBlock.craft = {
   props: {
     columns: 2,
     gap: "16px",
-    padding: "16px",
+    padding: "0px",
     background: "transparent",
   },
   related: {

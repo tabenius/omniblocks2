@@ -1,6 +1,5 @@
 import { getR2Bucket } from "@/lib/r2Bindings";
-
-export const runtime = "edge";
+import { requireAdmin } from "@/lib/adminRoute";
 
 function jsonResponse(payload: unknown, init?: ResponseInit): Response {
   return Response.json(payload, init);
@@ -19,6 +18,8 @@ function guessContentType(key: string): string {
 }
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if ("error" in auth) return auth.error;
   try {
     const url = new URL(request.url);
     const key = url.searchParams.get("key") || "";

@@ -10,6 +10,9 @@ type Contact = {
   notes: string;
   createdAt: string;
   updatedAt: string;
+  userId?: string;
+  username?: string;
+  source?: string;
 };
 
 type PurchasedProduct = {
@@ -84,6 +87,7 @@ type CopyInputProps = {
   label: string;
   value: string;
   placeholder?: string;
+  readOnly?: boolean;
   onChange: (value: string) => void;
   onCopy: () => void;
 };
@@ -92,6 +96,7 @@ const CopyInput = ({
   label,
   value,
   placeholder = "",
+  readOnly = false,
   onChange,
   onCopy,
 }: CopyInputProps) => (
@@ -102,9 +107,14 @@ const CopyInput = ({
     <div className="relative">
       <input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          if (readOnly) return;
+          onChange(e.target.value);
+        }}
         placeholder={placeholder}
-        className="w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 pr-9 text-xs"
+        readOnly={readOnly}
+        aria-readonly={readOnly}
+        className="w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 pr-9 text-xs disabled:opacity-70"
       />
       <button
         type="button"
@@ -129,6 +139,7 @@ export const ContactsTab = () => {
   const [search, setSearch] = React.useState("");
   const [purchases, setPurchases] = React.useState<PurchasedProduct[]>([]);
   const [purchasesLoading, setPurchasesLoading] = React.useState(false);
+  const [emailLocked, setEmailLocked] = React.useState(false);
 
   const loadContacts = React.useCallback(async () => {
     try {
@@ -199,6 +210,7 @@ export const ContactsTab = () => {
     setOriginal(newDraft);
     setPurchases([]);
     setPurchasesLoading(false);
+    setEmailLocked(false);
     setOpen(true);
     setStatus("");
   };
@@ -209,6 +221,9 @@ export const ContactsTab = () => {
     setOriginal(next);
     void loadPurchases(contact.email);
     setOpen(true);
+    setEmailLocked(
+      contact.source === "users" || contact.source === "users+contacts",
+    );
     setStatus("");
   };
 
@@ -343,11 +358,17 @@ export const ContactsTab = () => {
               label="Email"
               value={draft.email}
               placeholder="name@example.com"
+              readOnly={emailLocked}
               onChange={(value) => setDraft((prev) => ({ ...prev, email: value }))}
               onCopy={() => {
                 void onCopy(draft.email, "Email");
               }}
             />
+            {emailLocked ? (
+              <div className="text-[11px] text-[var(--color-muted-foreground)] -mt-1">
+                Email is linked from users and is read-only here.
+              </div>
+            ) : null}
             <CopyInput
               label="Phone"
               value={draft.phone}

@@ -5,6 +5,7 @@ import {
   TextField,
   SelectField,
   ColorField,
+  BackgroundField,
   AlignField,
   FieldStack,
 } from "@/components/editor/fields";
@@ -15,6 +16,7 @@ export type HeadingProps = {
   text?: string;
   level?: HeadingLevel;
   color?: string;
+  background?: string;
   textAlign?: "left" | "center" | "right";
 };
 
@@ -31,6 +33,7 @@ export const Heading = ({
   text = "Heading",
   level = 1,
   color = "var(--color-foreground)",
+  background = "transparent",
   textAlign = "left",
 }: HeadingProps) => {
   const {
@@ -49,6 +52,7 @@ export const Heading = ({
         fontWeight: 700,
         color,
         textAlign,
+        background,
         margin: 0,
       }}
     >
@@ -67,6 +71,7 @@ const HeadingSettings = () => (
       parse={(v) => Number(v) as HeadingLevel}
     />
     <ColorField label="Color" propKey="color" />
+    <BackgroundField />
     <AlignField />
   </FieldStack>
 );
@@ -77,6 +82,7 @@ Heading.craft = {
     text: "Heading",
     level: 1,
     color: "var(--color-foreground)",
+    background: "transparent",
     textAlign: "left",
   },
   related: { settings: HeadingSettings },

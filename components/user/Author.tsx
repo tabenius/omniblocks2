@@ -5,6 +5,7 @@ import {
   TextField,
   BooleanField,
   PxSliderField,
+  BackgroundField,
   FieldStack,
 } from "@/components/editor/fields";
 
@@ -14,6 +15,7 @@ export type AuthorProps = {
   email?: string;
   showEmail?: boolean;
   avatarSize?: string;
+  background?: string;
 };
 
 export const Author = ({
@@ -22,6 +24,7 @@ export const Author = ({
   email = "jane@example.com",
   showEmail = true,
   avatarSize = "32px",
+  background = "transparent",
 }: AuthorProps) => {
   const {
     connectors: { connect, drag },
@@ -32,7 +35,7 @@ export const Author = ({
       ref={(ref: HTMLDivElement | null) => {
         if (ref) connect(drag(ref));
       }}
-      style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}
+      style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, background }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -87,6 +90,7 @@ const AuthorSettings = () => (
     <TextField label="Email" propKey="email" />
     <PxSliderField label="Avatar size" propKey="avatarSize" min={16} max={192} step={2} fallback={32} />
     <BooleanField label="Show email" propKey="showEmail" />
+    <BackgroundField />
   </FieldStack>
 );
 
@@ -98,6 +102,7 @@ Author.craft = {
     email: "jane@example.com",
     showEmail: true,
     avatarSize: "32px",
+    background: "transparent",
   },
   related: { settings: AuthorSettings },
 };

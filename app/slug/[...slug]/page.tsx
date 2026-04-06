@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { buildStaticHtmlDocument } from "@/lib/htmlExport";
 import {
   parseSerializedNodes,
+  readPreviewThemeMode,
+  readPreviewThemeVariables,
   readSerializedContent,
 } from "@/components/previews/storage";
 
@@ -20,9 +22,12 @@ export default function SlugPage() {
     const saved = readSerializedContent(slugParam);
     const parsed = parseSerializedNodes(saved);
     if (parsed) {
+      const mode = readPreviewThemeMode();
+      const themeVariables = readPreviewThemeVariables(mode);
       setHtml(
         buildStaticHtmlDocument(parsed as StaticNodes, {
           title: slugParam || "document",
+          themeVariables,
         }),
       );
     } else {

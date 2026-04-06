@@ -15,16 +15,24 @@ export const Container = ({
   children,
 }: ContainerProps) => {
   const {
+    isEmptyCanvas,
     connectors: { connect, drag },
-  } = useNode();
+  } = useNode((node) => ({
+    isEmptyCanvas: node.data.isCanvas && node.data.nodes.length === 0,
+  }));
 
   return (
     <div
       ref={(ref) => {
         if (ref) connect(drag(ref));
       }}
-      style={{ background, padding }}
-      className="min-h-[40px]"
+      style={{
+        background,
+        padding,
+        minHeight: isEmptyCanvas ? "80px" : "40px",
+        height: "100%",
+        boxSizing: "border-box",
+      }}
     >
       {children}
     </div>
