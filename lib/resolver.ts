@@ -21,6 +21,7 @@ import { Name } from "@/components/user/Name";
 import { Email } from "@/components/user/Email";
 import { Textarea } from "@/components/user/Textarea";
 import { Button } from "@/components/user/Button";
+import { LinkExtended } from "@/components/user/LinkExtended";
 
 export const resolver = {
   Container,
@@ -46,4 +47,5 @@ export const resolver = {
   Email,
   Textarea,
   Button,
+  LinkExtended,
 };

@@ -13,6 +13,7 @@ const POSITIONAL_PROP: Record<string, string> = {
   Event: "title",
   Author: "name",
   Button: "text",
+  LinkExtended: "href",
   Name: "label",
   Email: "label",
   Textarea: "label",

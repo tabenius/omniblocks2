@@ -24,6 +24,7 @@ import { Name } from "@/components/user/Name";
 import { Email } from "@/components/user/Email";
 import { Textarea } from "@/components/user/Textarea";
 import { Button } from "@/components/user/Button";
+import { LinkExtended } from "@/components/user/LinkExtended";
 
 export const Toolbox = () => {
   const { connectors } = useEditor();
@@ -105,6 +106,12 @@ export const Toolbox = () => {
       group: "Interactive",
       create: <Button />,
       parentHint: "Container, Text, Hero, PrimaryBox, Form",
+    },
+    {
+      label: "LinkExtended",
+      group: "Interactive",
+      create: <LinkExtended />,
+      parentHint: "Container, Text, Hero, PrimaryBox",
     },
     { label: "Name", group: "Interactive", create: <Name />, parentHint: "Form" },
     { label: "Email", group: "Interactive", create: <Email />, parentHint: "Form" },

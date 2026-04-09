@@ -15,6 +15,7 @@ import type { NameProps } from "@/components/user/Name";
 import type { EmailProps } from "@/components/user/Email";
 import type { TextareaProps } from "@/components/user/Textarea";
 import type { ButtonProps } from "@/components/user/Button";
+import type { LinkExtendedProps, LinkExtendedOfferType } from "@/components/user/LinkExtended";
 
 const emailSize: Record<HeadingLevel, string> = {
   1: "32px",
@@ -246,6 +247,171 @@ export const ButtonEmail = (p: ButtonProps) => (
     </tbody>
   </table>
 );
+
+function asOfferType(value: unknown): LinkExtendedOfferType {
+  if (
+    value === "asset" ||
+    value === "course" ||
+    value === "workshop" ||
+    value === "event" ||
+    value === "file-download"
+  ) {
+    return value;
+  }
+  return "none";
+}
+
+function offerTypeLabel(value: LinkExtendedOfferType): string {
+  switch (value) {
+    case "asset":
+      return "Asset";
+    case "course":
+      return "Course";
+    case "workshop":
+      return "Workshop";
+    case "event":
+      return "Event";
+    case "file-download":
+      return "File Download";
+    default:
+      return "Linked Item";
+  }
+}
+
+function defaultOfferCta(type: LinkExtendedOfferType): string {
+  return type === "file-download" ? "Download" : "Buy Now";
+}
+
+export const LinkExtendedEmail = (p: LinkExtendedProps) => {
+  const href = (p.href ?? "").trim();
+  const offerType = asOfferType(p.offerType);
+  const showOfferWidget = Boolean(p.showOfferWidget) && offerType !== "none";
+  const ctaText = (p.offerCtaText || "").trim() || defaultOfferCta(offerType);
+
+  if (!href) {
+    return (
+      <REText
+        style={{
+          margin: "0 0 10px 0",
+          fontSize: "12px",
+          color: "#64748b",
+          fontFamily: "Arial, Helvetica, sans-serif",
+        }}
+      >
+        Add a URL in LinkExtended settings.
+      </REText>
+    );
+  }
+
+  return (
+    <table
+      role="presentation"
+      cellPadding={0}
+      cellSpacing={0}
+      border={0}
+      width="100%"
+      style={{ borderCollapse: "collapse" }}
+    >
+      <tbody>
+        <tr>
+          <td>
+            <Link
+              href={href}
+              style={{
+                color: p.color ?? "#2563eb",
+                textDecoration: "none",
+                fontSize: "14px",
+                fontWeight: 600,
+                fontFamily: "Arial, Helvetica, sans-serif",
+              }}
+            >
+              {encode(p.text ?? "Open link")}
+            </Link>
+          </td>
+        </tr>
+        {showOfferWidget ? (
+          <tr>
+            <td style={{ paddingTop: "10px" }}>
+              <table
+                role="presentation"
+                cellPadding={0}
+                cellSpacing={0}
+                border={0}
+                width="100%"
+                style={{
+                  borderCollapse: "collapse",
+                  border: `1px solid ${p.borderColor ?? "#cbd5e1"}`,
+                  borderRadius: "10px",
+                  background: "#f8fafc",
+                }}
+              >
+                <tbody>
+                  <tr>
+                    <td style={{ padding: "12px" }}>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: "#64748b",
+                          fontFamily: "Arial, Helvetica, sans-serif",
+                        }}
+                      >
+                        {encode(offerTypeLabel(offerType))}
+                      </div>
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          fontSize: "16px",
+                          fontWeight: 700,
+                          color: "#0f172a",
+                          fontFamily: "Arial, Helvetica, sans-serif",
+                        }}
+                      >
+                        {encode(p.offerTitle || "Linked offer")}
+                      </div>
+                      {p.offerSubtitle ? (
+                        <div
+                          style={{
+                            marginTop: "6px",
+                            fontSize: "13px",
+                            color: "#475569",
+                            fontFamily: "Arial, Helvetica, sans-serif",
+                          }}
+                        >
+                          {encode(p.offerSubtitle)}
+                        </div>
+                      ) : null}
+                      <div style={{ marginTop: "10px" }}>
+                        <Link
+                          href={href}
+                          style={{
+                            display: "inline-block",
+                            border: `1px solid ${p.borderColor ?? "#2563eb"}`,
+                            borderRadius: "9999px",
+                            background: p.color ?? "#2563eb",
+                            color: "#ffffff",
+                            textDecoration: "none",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            fontFamily: "Arial, Helvetica, sans-serif",
+                            padding: "7px 12px",
+                          }}
+                        >
+                          {encode(ctaText)}
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        ) : null}
+      </tbody>
+    </table>
+  );
+};
 
 export const ImageEmail = (p: ImageBlockProps) => {
   const align = p.align ?? "center";

@@ -74,6 +74,12 @@ const TOKEN_MAP: Record<string, TokenMeta> = {
     positionalProp: "name",
     isCanvas: false,
   },
+  LinkExtended: {
+    typeName: "LinkExtended",
+    displayName: "LinkExtended",
+    positionalProp: "href",
+    isCanvas: false,
+  },
   Text: { typeName: "TextBlock", displayName: "Text", isCanvas: true },
   PrimaryBox: { typeName: "PrimaryBox", displayName: "PrimaryBox", isCanvas: true },
   LayoutBlock: { typeName: "LayoutBlock", displayName: "LayoutBlock", isCanvas: false },

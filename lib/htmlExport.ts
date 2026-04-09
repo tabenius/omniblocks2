@@ -5,6 +5,7 @@ type HtmlExportOptions = {
   title?: string;
   themeVariables?: Record<string, string>;
 };
+type OfferType = "none" | "asset" | "course" | "workshop" | "event" | "file-download";
 
 const HEADING_SIZES: Record<number, string> = {
   1: "36px",
@@ -60,6 +61,10 @@ const DEFAULT_THEME_VARIABLES: Record<string, string> = {
   "--color-warning": "#d97706",
   "--color-danger": "#dc2626",
 };
+const LINK_EXT_VIDEO_URL_RE =
+  /(?:youtube\.com|youtu\.be|vimeo\.com|\.mp4(?:$|\?)|\.webm(?:$|\?)|\.mov(?:$|\?)|\.m4v(?:$|\?))/i;
+const LINK_EXT_AUDIO_URL_RE =
+  /(?:\.mp3(?:$|\?)|\.wav(?:$|\?)|\.ogg(?:$|\?)|\.m4a(?:$|\?)|\.aac(?:$|\?)|\.flac(?:$|\?))/i;
 
 function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
@@ -192,6 +197,287 @@ function toEmbeddableVideoUrl(raw: string): string {
   } catch {
     return input;
   }
+}
+
+function resolveLinkExtendedMode(
+  mode: "auto" | "link" | "video" | "audio",
+  href: string,
+): "link" | "video" | "audio" {
+  if (mode !== "auto") return mode;
+  const input = href.trim();
+  if (!input) return "link";
+  if (LINK_EXT_VIDEO_URL_RE.test(input)) return "video";
+  if (LINK_EXT_AUDIO_URL_RE.test(input)) return "audio";
+  return "link";
+}
+
+function asOfferType(value: unknown): OfferType {
+  const candidate = asString(value, "none");
+  if (
+    candidate === "asset" ||
+    candidate === "course" ||
+    candidate === "workshop" ||
+    candidate === "event" ||
+    candidate === "file-download"
+  ) {
+    return candidate;
+  }
+  return "none";
+}
+
+function defaultOfferCta(type: OfferType): string {
+  return type === "file-download" ? "Download" : "Buy Now";
+}
+
+function offerTypeLabel(type: OfferType): string {
+  switch (type) {
+    case "asset":
+      return "Asset";
+    case "course":
+      return "Course";
+    case "workshop":
+      return "Workshop";
+    case "event":
+      return "Event";
+    case "file-download":
+      return "File Download";
+    default:
+      return "Linked Item";
+  }
+}
+
+function offerIcon(type: OfferType): string {
+  switch (type) {
+    case "course":
+      return "▦";
+    case "workshop":
+      return "◆";
+    case "event":
+      return "◷";
+    case "file-download":
+      return "⇩";
+    case "asset":
+    default:
+      return "◈";
+  }
+}
+
+function renderLinkExtendedWidget(
+  href: string,
+  openInNewTab: boolean,
+  borderColor: string,
+  offerType: OfferType,
+  offerTitle: string,
+  offerSubtitle: string,
+  offerMeta: string,
+  offerPrice: string,
+  offerCtaText: string,
+): string {
+  const actionLabel = offerCtaText.trim() || defaultOfferCta(offerType);
+  if (offerType === "event") {
+    return wrap(
+      "a",
+      {
+        href,
+        target: openInNewTab ? "_blank" : undefined,
+        rel: openInNewTab ? "noreferrer noopener" : undefined,
+        style: styleValue({
+          border: `1px solid ${borderColor}`,
+          borderRadius: "10px",
+          background: "var(--color-muted)",
+          padding: "12px",
+          textDecoration: "none",
+          display: "grid",
+          gridTemplateColumns: "72px minmax(0, 1fr)",
+          gap: "12px",
+          color: "inherit",
+        }),
+      },
+      `${wrap(
+        "div",
+        {
+          style: styleValue({
+            borderRadius: "10px",
+            border: `1px solid ${borderColor}`,
+            background: "var(--color-surface)",
+            color: "var(--color-foreground)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "var(--font-default)",
+          }),
+        },
+        `${wrap(
+          "div",
+          {
+            style: styleValue({
+              fontSize: "10px",
+              textTransform: "uppercase",
+              opacity: "0.8",
+            }),
+          },
+          "Event",
+        )}${wrap("div", { style: styleValue({ fontSize: "26px", fontWeight: "800" }) }, "15")}${wrap(
+          "div",
+          { style: styleValue({ fontSize: "11px", opacity: "0.8" }) },
+          "JUN",
+        )}`,
+      )}${wrap(
+        "div",
+        {
+          style: styleValue({
+            minWidth: "0",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+          }),
+        },
+        `${wrap(
+          "div",
+          {
+            style: styleValue({
+              fontSize: "11px",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--color-muted-foreground)",
+            }),
+          },
+          offerTypeLabel(offerType),
+        )}${wrap(
+          "div",
+          { style: styleValue({ fontSize: "16px", fontWeight: "700", color: "var(--color-foreground)" }) },
+          escapeHtml(offerTitle),
+        )}${
+          offerSubtitle.trim()
+            ? wrap(
+                "div",
+                { style: styleValue({ fontSize: "13px", color: "var(--color-muted-foreground)" }) },
+                escapeHtml(offerSubtitle),
+              )
+            : ""
+        }${wrap(
+          "div",
+          {
+            style: styleValue({
+              marginTop: "4px",
+              display: "inline-flex",
+              alignSelf: "flex-start",
+              borderRadius: "9999px",
+              border: `1px solid ${borderColor}`,
+              background: "var(--color-primary)",
+              color: "var(--color-primary-foreground)",
+              padding: "6px 12px",
+              fontSize: "12px",
+              fontWeight: "600",
+            }),
+          },
+          escapeHtml(actionLabel),
+        )}`,
+      )}`,
+    );
+  }
+
+  return wrap(
+    "a",
+    {
+      href,
+      target: openInNewTab ? "_blank" : undefined,
+      rel: openInNewTab ? "noreferrer noopener" : undefined,
+      style: styleValue({
+        border: `1px solid ${borderColor}`,
+        borderRadius: "10px",
+        background: "var(--color-muted)",
+        padding: "12px",
+        textDecoration: "none",
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        color: "inherit",
+      }),
+    },
+    `${wrap(
+      "div",
+      { style: styleValue({ display: "flex", alignItems: "center", gap: "8px" }) },
+      `${wrap(
+        "span",
+        {
+          style: styleValue({
+            width: "26px",
+            height: "26px",
+            borderRadius: "9999px",
+            border: `1px solid ${borderColor}`,
+            background: "var(--color-surface)",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "13px",
+          }),
+        },
+        offerIcon(offerType),
+      )}${wrap(
+        "span",
+        {
+          style: styleValue({
+            fontSize: "11px",
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            color: "var(--color-muted-foreground)",
+          }),
+        },
+        offerTypeLabel(offerType),
+      )}`,
+    )}${wrap(
+      "div",
+      { style: styleValue({ fontSize: "16px", fontWeight: "700", color: "var(--color-foreground)" }) },
+      escapeHtml(offerTitle),
+    )}${
+      offerSubtitle.trim()
+        ? wrap(
+            "div",
+            { style: styleValue({ fontSize: "13px", color: "var(--color-muted-foreground)" }) },
+            escapeHtml(offerSubtitle),
+          )
+        : ""
+    }${wrap(
+      "div",
+      {
+        style: styleValue({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "10px",
+        }),
+      },
+      `${wrap(
+        "div",
+        {
+          style: styleValue({
+            minHeight: "18px",
+            color: "var(--color-foreground)",
+            fontSize: "14px",
+            fontWeight: "600",
+          }),
+        },
+        escapeHtml(offerPrice || offerMeta || "\u00A0"),
+      )}${wrap(
+        "div",
+        {
+          style: styleValue({
+            borderRadius: "9999px",
+            border: `1px solid ${borderColor}`,
+            background: "var(--color-primary)",
+            color: "var(--color-primary-foreground)",
+            padding: "6px 12px",
+            fontSize: "12px",
+            fontWeight: "600",
+            whiteSpace: "nowrap",
+          }),
+        },
+        escapeHtml(actionLabel),
+      )}`,
+    )}`,
+  );
 }
 
 function renderNode(
@@ -431,6 +717,217 @@ function renderNode(
           },
           escapeHtml(asString(props.text, "Submit")),
         ),
+      );
+    }
+    case "LinkExtended": {
+      const href = asString(props.href, "https://example.com").trim();
+      const resolvedMode = resolveLinkExtendedMode(
+        asString(props.mode, "auto") as "auto" | "link" | "video" | "audio",
+        href,
+      );
+      const align = asString(props.align, "left");
+      const justifyContent =
+        align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
+      const borderColor = asString(props.borderColor, "var(--color-border)");
+      const showOfferWidget = asBoolean(props.showOfferWidget, false);
+      const offerType = asOfferType(props.offerType);
+      const offerTitle = asString(props.offerTitle, "Linked offer");
+      const offerSubtitle = asString(props.offerSubtitle, "Describe what the buyer gets.");
+      const offerMeta = asString(props.offerMeta, "");
+      const offerPrice = asString(props.offerPrice, "$49");
+      const offerCtaText = asString(props.offerCtaText, "");
+      const showEmbed = asBoolean(props.showEmbed, true);
+      const openInNewTab = asBoolean(props.openInNewTab, true);
+
+      const anchorLabel =
+        resolvedMode === "video"
+          ? "Play video"
+          : resolvedMode === "audio"
+            ? "Play audio"
+            : asString(props.text, "Open link");
+      const embedSrc = resolvedMode === "video" ? toEmbeddableVideoUrl(href) : "";
+      const isEmbed = /youtube\.com\/embed|player\.vimeo\.com\/video/.test(embedSrc);
+
+      const linkRow = wrap(
+        "div",
+        {
+          style: styleValue({
+            display: "flex",
+            justifyContent,
+          }),
+        },
+        href
+          ? wrap(
+              "a",
+              {
+                href,
+                target: openInNewTab ? "_blank" : undefined,
+                rel: openInNewTab ? "noreferrer noopener" : undefined,
+                style: styleValue({
+                  color: asString(props.color, "var(--color-primary)"),
+                  textDecoration: "none",
+                  fontWeight: "600",
+                  fontSize: "14px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }),
+              },
+              `${wrap(
+                "span",
+                {
+                  style: styleValue({
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "9999px",
+                    border: `1px solid ${borderColor}`,
+                    background: "var(--color-muted)",
+                  }),
+                },
+                resolvedMode === "video" ? "▶" : resolvedMode === "audio" ? "♪" : "↗",
+              )}${wrap("span", {}, escapeHtml(anchorLabel))}`,
+            )
+          : wrap(
+              "span",
+              { style: styleValue({ color: "var(--color-muted-foreground)", fontSize: "13px" }) },
+              "Add a URL in LinkExtended settings.",
+            ),
+      );
+
+      const videoEmbed =
+        showEmbed && href && resolvedMode === "video"
+          ? wrap(
+              "div",
+              { style: styleValue({ display: "flex", flexDirection: "column", gap: "8px" }) },
+              `${asString(props.title, "").trim()
+                ? wrap(
+                    "div",
+                    {
+                      style: styleValue({
+                        fontSize: "12px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "var(--color-muted-foreground)",
+                        fontFamily: "var(--font-default)",
+                      }),
+                    },
+                    escapeHtml(asString(props.title, "Embedded media")),
+                  )
+                : ""}${wrap(
+                "div",
+                {
+                  style: styleValue({
+                    position: "relative",
+                    width: "100%",
+                    paddingTop: "56.25%",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    border: `1px solid ${borderColor}`,
+                    background: "#000",
+                  }),
+                },
+                isEmbed
+                  ? `<iframe${renderAttributes({
+                      src: embedSrc,
+                      title: asString(props.title, "Video player"),
+                      allow:
+                        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+                      allowfullscreen: "true",
+                      style: styleValue({
+                        position: "absolute",
+                        inset: "0",
+                        width: "100%",
+                        height: "100%",
+                        border: "0",
+                      }),
+                    })}></iframe>`
+                  : `<video${renderAttributes({
+                      src: embedSrc,
+                      controls: asBoolean(props.controls, true) ? "true" : undefined,
+                      autoplay: asBoolean(props.autoPlay, false) ? "true" : undefined,
+                      loop: asBoolean(props.loop, false) ? "true" : undefined,
+                      muted: asBoolean(props.muted, false) ? "true" : undefined,
+                      style: styleValue({
+                        position: "absolute",
+                        inset: "0",
+                        width: "100%",
+                        height: "100%",
+                      }),
+                    })}></video>`,
+              )}`,
+            )
+          : "";
+
+      const audioEmbed =
+        showEmbed && href && resolvedMode === "audio"
+          ? wrap(
+              "div",
+              {
+                style: styleValue({
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                  background: "var(--color-muted)",
+                  border: `1px solid ${borderColor}`,
+                  borderRadius: "10px",
+                  padding: "12px",
+                }),
+              },
+              `${asString(props.title, "").trim()
+                ? wrap(
+                    "div",
+                    {
+                      style: styleValue({
+                        fontSize: "12px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "var(--color-muted-foreground)",
+                        fontFamily: "var(--font-default)",
+                      }),
+                    },
+                    escapeHtml(asString(props.title, "Embedded media")),
+                  )
+                : ""}${renderAudio(
+                href,
+                asBoolean(props.controls, true),
+                asBoolean(props.autoPlay, false),
+                asBoolean(props.loop, false),
+              )}`,
+            )
+          : "";
+
+      const offerWidget =
+        showOfferWidget && offerType !== "none" && resolvedMode === "link" && href
+          ? renderLinkExtendedWidget(
+              href,
+              openInNewTab,
+              borderColor,
+              offerType,
+              offerTitle,
+              offerSubtitle,
+              offerMeta,
+              offerPrice,
+              offerCtaText,
+            )
+          : "";
+
+      return wrap(
+        "div",
+        {
+          style: styleValue({
+            background: asString(props.background, "var(--color-surface)"),
+            border: `1px solid ${borderColor}`,
+            borderRadius: asString(props.borderRadius, "var(--radius-md)"),
+            padding: asString(props.padding, "var(--space-md)"),
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+          }),
+        },
+        `${linkRow}${videoEmbed}${audioEmbed}${offerWidget}`,
       );
     }
     case "TextBlock":
