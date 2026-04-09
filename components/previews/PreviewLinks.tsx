@@ -7,6 +7,7 @@ export const PreviewLinks = ({ slugParam }: { slugParam?: string }) => {
   const previewHref = slugParam ? `/preview/${slugParam}` : "/preview";
   const previewEmailHref = slugParam ? `/preview-email/${slugParam}` : "/preview-email";
   const editHref = slugParam ? `/slug/edit/${slugParam}` : "/";
+  const publishedHref = slugParam ? `/land/${slugParam}` : null;
 
   return (
     <div
@@ -38,8 +39,15 @@ export const PreviewLinks = ({ slugParam }: { slugParam?: string }) => {
         >
           Preview Email
         </Link>
+        {publishedHref ? (
+          <Link
+            href={publishedHref}
+            className="rounded border border-slate-300 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-100 text-center"
+          >
+            Published (ISR)
+          </Link>
+        ) : null}
       </div>
     </div>
   );
 };
-

@@ -21,3 +21,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - [x] Keep templates/examples accessible while logged out; mute save with `Login required` tooltip.
 - [x] Save/load named documents in R2 via `/api/r2/pages` with mandatory file name.
 - [x] Extend `LinkExtended` with linked offer widgets (`asset/course/workshop/event/file-download`) including Suspense skeleton preview and export/email support.
+- [x] Add public `/land/[slug]` route with ISR (`revalidate`) loading saved page JSON from R2.

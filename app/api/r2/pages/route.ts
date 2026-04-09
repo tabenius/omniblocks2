@@ -1,53 +1,17 @@
 import { requireAdmin } from "@/lib/adminRoute";
 import { getR2Bucket } from "@/lib/r2Bindings";
-
-type SavedPage = {
-  name: string;
-  slug: string;
-  content: string;
-  updatedAt: string;
-};
+import {
+  type SavedPage,
+  coerceSavedPage,
+  fileKeyForSavedPageSlug,
+  getPagesPrefix,
+  slugifySavedPage,
+} from "@/lib/savedPages";
 
 const MAX_PAGE_BYTES = 2_500_000;
 
 function jsonResponse(payload: unknown, init?: ResponseInit): Response {
   return Response.json(payload, init);
-}
-
-function getPagesPrefix(): string {
-  const raw = String(process.env.R2_PAGES_PREFIX || "saved-pages/").trim();
-  if (!raw) return "saved-pages/";
-  return raw.endsWith("/") ? raw : `${raw}/`;
-}
-
-function slugify(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function asIsoString(value: unknown): string {
-  const raw = typeof value === "string" ? value : "";
-  const date = new Date(raw);
-  if (!raw || Number.isNaN(date.getTime())) return new Date().toISOString();
-  return date.toISOString();
-}
-
-function coerceSavedPage(value: unknown): SavedPage | null {
-  if (!value || typeof value !== "object") return null;
-  const record = value as Record<string, unknown>;
-  const name = typeof record.name === "string" ? record.name.trim() : "";
-  const slug = typeof record.slug === "string" ? slugify(record.slug) : "";
-  const content = typeof record.content === "string" ? record.content : "";
-  const updatedAt = asIsoString(record.updatedAt);
-  if (!name || !slug || !content) return null;
-  return { name, slug, content, updatedAt };
-}
-
-function fileKeyForSlug(prefix: string, slug: string): string {
-  return `${prefix}${slug}.json`;
 }
 
 async function listSavedPages(prefix: string): Promise<SavedPage[]> {
@@ -91,13 +55,13 @@ export async function GET(request: Request) {
     }
 
     const url = new URL(request.url);
-    const slug = slugify(url.searchParams.get("slug") || "");
+    const slug = slugifySavedPage(url.searchParams.get("slug") || "");
     if (!slug) {
       const docs = await listSavedPages(prefix);
       return jsonResponse({ ok: true, docs });
     }
 
-    const key = fileKeyForSlug(prefix, slug);
+    const key = fileKeyForSavedPageSlug(prefix, slug);
     const obj = await bucket.get(key);
     if (!obj?.body) {
       return jsonResponse({ ok: false, error: "Saved page not found." }, { status: 404 });
@@ -143,7 +107,7 @@ export async function POST(request: Request) {
   const record = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
   const name = typeof record.name === "string" ? record.name.trim() : "";
   const incomingSlug = typeof record.slug === "string" ? record.slug : "";
-  const slug = slugify(incomingSlug || name);
+  const slug = slugifySavedPage(incomingSlug || name);
   const content = typeof record.content === "string" ? record.content : "";
   if (!name) {
     return jsonResponse({ ok: false, error: "File name is required." }, { status: 400 });
@@ -178,7 +142,7 @@ export async function POST(request: Request) {
       content,
       updatedAt: new Date().toISOString(),
     };
-    const key = fileKeyForSlug(prefix, slug);
+    const key = fileKeyForSavedPageSlug(prefix, slug);
     await bucket.put(key, JSON.stringify(doc), {
       httpMetadata: {
         contentType: "application/json; charset=utf-8",
@@ -208,7 +172,7 @@ export async function DELETE(request: Request) {
     body = {};
   }
   const record = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
-  const slug = slugify(typeof record.slug === "string" ? record.slug : "");
+  const slug = slugifySavedPage(typeof record.slug === "string" ? record.slug : "");
   if (!slug) {
     return jsonResponse({ ok: false, error: "Missing page slug." }, { status: 400 });
   }
@@ -227,7 +191,7 @@ export async function DELETE(request: Request) {
         { status: 500 },
       );
     }
-    const key = fileKeyForSlug(prefix, slug);
+    const key = fileKeyForSavedPageSlug(prefix, slug);
     await bucket.delete(key);
     return jsonResponse({ ok: true, slug });
   } catch (error) {
