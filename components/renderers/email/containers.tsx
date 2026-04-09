@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Section } from "@react-email/components";
+import { Link, Section } from "@react-email/components";
 import { encode } from "html-entities";
 import type { ContainerProps } from "@/components/user/Container";
 import type { TextBlockProps } from "@/components/user/TextBlock";
@@ -159,8 +159,15 @@ export const AssetEmail = ({
   background,
   padding,
   borderRadius,
+  offerType,
+  offerId,
   price,
   currency,
+  checkoutUrl,
+  ctaText,
+  showCta,
+  ctaBackground,
+  ctaColor,
   children,
 }: AssetProps & { children?: React.ReactNode }) => (
   <table
@@ -185,15 +192,74 @@ export const AssetEmail = ({
           <Section style={{ paddingTop: "12px" }}>
             <div
               style={{
-                textAlign: "right",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "#0f172a",
-                fontFamily: "Arial, Helvetica, sans-serif",
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: "10px",
+                flexWrap: "wrap",
               }}
             >
-              {encode((currency ?? "$") + (price ?? ""))}
+              <div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: "#64748b",
+                    fontFamily: "Arial, Helvetica, sans-serif",
+                  }}
+                >
+                  {(offerType || "asset").replaceAll("-", " ")}
+                </div>
+                {offerId ? (
+                  <div
+                    style={{
+                      marginTop: "3px",
+                      fontSize: "11px",
+                      color: "#64748b",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    }}
+                  >
+                    {encode(offerId)}
+                  </div>
+                ) : null}
+              </div>
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  color: "#0f172a",
+                  fontFamily: "Arial, Helvetica, sans-serif",
+                }}
+              >
+                {encode((currency ?? "$") + (price ?? ""))}
+              </div>
             </div>
+            {showCta !== false && checkoutUrl ? (
+              <div style={{ marginTop: "10px", textAlign: "right" }}>
+                <Link
+                  href={checkoutUrl}
+                  style={{
+                    display: "inline-block",
+                    borderRadius: "9999px",
+                    border: "1px solid #cbd5e1",
+                    background: ctaBackground ?? "#2563eb",
+                    color: ctaColor ?? "#ffffff",
+                    textDecoration: "none",
+                    padding: "8px 12px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    fontFamily: "Arial, Helvetica, sans-serif",
+                  }}
+                >
+                  {encode(
+                    (ctaText?.trim() ||
+                      (offerType === "file-download" ? "Download" : "Buy Now")),
+                  )}
+                </Link>
+              </div>
+            ) : null}
           </Section>
         </td>
       </tr>

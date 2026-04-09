@@ -673,6 +673,54 @@ export const EventEmail = (p: EventProps) => {
             <div style={{ fontSize: "14px", lineHeight: "1.45", color: "#475569", fontFamily: "Arial, Helvetica, sans-serif" }}>
               {encode(p.text ?? "Event description paragraph")}
             </div>
+            {(p.offerId || p.price || (p.showCta !== false && p.checkoutUrl)) ? (
+              <div style={{ marginTop: "10px" }}>
+                {p.offerId ? (
+                  <div
+                    style={{
+                      marginBottom: "6px",
+                      fontSize: "11px",
+                      color: "#64748b",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    }}
+                  >
+                    {encode(p.offerId)}
+                  </div>
+                ) : null}
+                {p.price ? (
+                  <div
+                    style={{
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      color: "#0f172a",
+                      fontFamily: "Arial, Helvetica, sans-serif",
+                    }}
+                  >
+                    {encode(`${p.currency ?? "$"}${p.price}`)}
+                  </div>
+                ) : null}
+                {p.showCta !== false && p.checkoutUrl ? (
+                  <Link
+                    href={p.checkoutUrl}
+                    style={{
+                      display: "inline-block",
+                      borderRadius: "9999px",
+                      border: "1px solid #cbd5e1",
+                      background: p.ctaBackground ?? "#2563eb",
+                      color: p.ctaColor ?? "#ffffff",
+                      textDecoration: "none",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      fontFamily: "Arial, Helvetica, sans-serif",
+                      padding: "8px 12px",
+                    }}
+                  >
+                    {encode((p.ctaText || "Reserve Spot").trim())}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
           </td>
         </tr>
       </tbody>

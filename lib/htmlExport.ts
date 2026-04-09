@@ -1046,7 +1046,13 @@ function renderNode(
         items,
       );
     }
-    case "Asset":
+    case "Asset": {
+      const offerType = asOfferType(props.offerType);
+      const offerId = asString(props.offerId, "");
+      const checkoutUrl = asString(props.checkoutUrl, "").trim();
+      const showCta = asBoolean(props.showCta, true);
+      const openInNewTab = asBoolean(props.openInNewTab, true);
+      const ctaText = asString(props.ctaText, "").trim() || defaultOfferCta(offerType);
       return wrap(
         "article",
         {
@@ -1065,15 +1071,97 @@ function renderNode(
           {
             style: styleValue({
               display: "flex",
-              justifyContent: "flex-end",
-              fontSize: "16px",
-              fontWeight: "700",
-              color: "#111827",
+              flexDirection: "column",
+              gap: "10px",
             }),
           },
-          `${escapeHtml(asString(props.currency, "$"))}${escapeHtml(asString(props.price, "49"))}`,
+          `${wrap(
+            "div",
+            {
+              style: styleValue({
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: "12px",
+                flexWrap: "wrap",
+              }),
+            },
+            `${wrap(
+              "div",
+              { style: styleValue({ minWidth: "0" }) },
+              `${wrap(
+                "div",
+                {
+                  style: styleValue({
+                    fontSize: "11px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: "var(--color-muted-foreground)",
+                    fontFamily: "var(--font-default)",
+                  }),
+                },
+                offerTypeLabel(offerType),
+              )}${
+                offerId
+                  ? wrap(
+                      "div",
+                      {
+                        style: styleValue({
+                          marginTop: "3px",
+                          fontSize: "11px",
+                          color: "var(--color-muted-foreground)",
+                          fontFamily: "var(--font-mono)",
+                        }),
+                      },
+                      escapeHtml(offerId),
+                    )
+                  : ""
+              }`,
+            )}${wrap(
+              "div",
+              {
+                style: styleValue({
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  fontSize: "16px",
+                  fontWeight: "700",
+                  color: "#111827",
+                }),
+              },
+              `${escapeHtml(asString(props.currency, "$"))}${escapeHtml(asString(props.price, "49"))}`,
+            )}`,
+          )}${
+            showCta && checkoutUrl
+              ? wrap(
+                  "div",
+                  { style: styleValue({ display: "flex", justifyContent: "flex-end" }) },
+                  wrap(
+                    "a",
+                    {
+                      href: checkoutUrl,
+                      target: openInNewTab ? "_blank" : undefined,
+                      rel: openInNewTab ? "noreferrer noopener" : undefined,
+                      style: styleValue({
+                        borderRadius: "9999px",
+                        border: "1px solid var(--color-border)",
+                        background: asString(props.ctaBackground, "var(--color-primary)"),
+                        color: asString(props.ctaColor, "var(--color-primary-foreground)"),
+                        textDecoration: "none",
+                        padding: "8px 14px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        fontFamily: "var(--font-default)",
+                        lineHeight: "1.2",
+                      }),
+                    },
+                    escapeHtml(ctaText),
+                  ),
+                )
+              : ""
+          }`,
         )}`,
       );
+    }
     case "Author": {
       const name = asString(props.name, "Jane Doe");
       const email = asString(props.email, "jane@example.com");
@@ -1369,6 +1457,76 @@ function renderNode(
               }),
             },
             escapeHtml(asString(props.text, "Event description paragraph")),
+          )}${wrap(
+            "div",
+            {
+              style: styleValue({
+                marginTop: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "10px",
+                flexWrap: "wrap",
+              }),
+            },
+            `${wrap(
+              "div",
+              { style: styleValue({ minHeight: "18px" }) },
+              `${asString(props.offerId, "").trim()
+                ? wrap(
+                    "code",
+                    {
+                      style: styleValue({
+                        fontSize: "11px",
+                        color: "var(--color-muted-foreground)",
+                        fontFamily: "var(--font-mono)",
+                      }),
+                    },
+                    escapeHtml(asString(props.offerId, "")),
+                  )
+                : ""}${
+                asString(props.price, "").trim()
+                  ? wrap(
+                      "div",
+                      {
+                        style: styleValue({
+                          fontSize: "14px",
+                          fontWeight: "700",
+                          color: "var(--color-foreground)",
+                          fontFamily: "var(--font-default)",
+                        }),
+                      },
+                      `${escapeHtml(asString(props.currency, "$"))}${escapeHtml(asString(props.price, ""))}`,
+                    )
+                  : ""
+              }`,
+            )}${
+              asBoolean(props.showCta, true) && asString(props.checkoutUrl, "").trim()
+                ? wrap(
+                    "a",
+                    {
+                      href: asString(props.checkoutUrl, ""),
+                      target: asBoolean(props.openInNewTab, true) ? "_blank" : undefined,
+                      rel: asBoolean(props.openInNewTab, true) ? "noreferrer noopener" : undefined,
+                      style: styleValue({
+                        borderRadius: "9999px",
+                        border: `1px solid ${asString(props.borderColor, "var(--color-border)")}`,
+                        background: asString(props.ctaBackground, "var(--color-primary)"),
+                        color: asString(props.ctaColor, "var(--color-primary-foreground)"),
+                        textDecoration: "none",
+                        padding: "7px 12px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        fontFamily: "var(--font-default)",
+                        lineHeight: "1.2",
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }),
+                    },
+                    escapeHtml(asString(props.ctaText, "Reserve Spot")),
+                  )
+                : ""
+            }`,
           )}`,
         )}`,
       );
