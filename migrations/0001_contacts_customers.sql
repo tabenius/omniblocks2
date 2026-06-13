@@ -1,5 +1,5 @@
 -- D1 schema for contacts/customer records used by omniblocks2.
--- Mirrors the DB binding used in ../articulate-universe/main.
+-- Mirrors the DB binding used in ../articulate-universe/storefront.
 
 CREATE TABLE IF NOT EXISTS contacts (
   id TEXT PRIMARY KEY,

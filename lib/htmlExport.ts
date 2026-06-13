@@ -127,6 +127,11 @@ function escapeHtml(input: string): string {
     .replaceAll("'", "&#39;");
 }
 
+function toDomIdFragment(input: string): string {
+  const cleaned = input.replace(/[^a-zA-Z0-9_-]/g, "");
+  return cleaned.length > 0 ? cleaned : "contact";
+}
+
 function sanitizeThemeVariables(input?: Record<string, string>): Record<string, string> {
   if (!input) return { ...DEFAULT_THEME_VARIABLES };
   const merged = { ...DEFAULT_THEME_VARIABLES };
@@ -575,6 +580,354 @@ function renderNode(
         },
         joinedChildren,
       );
+    case "ContactForm": {
+      const modalId = `contact-modal-${toDomIdFragment(id)}`;
+      const titleId = `${modalId}-title`;
+      const descriptionId = `${modalId}-description`;
+      const action = asString(props.action, "/api/contact").trim() || "/api/contact";
+      const triggerText = asString(props.triggerText, "Contact");
+      const title = asString(props.title, "Get in touch");
+      const description = asString(
+        props.description,
+        "Send a short note and we will get back to you.",
+      );
+      const submitText = asString(props.submitText, "Send");
+      const cancelText = asString(props.cancelText, "Cancel");
+      const nameLabel = asString(props.nameLabel, "Name");
+      const namePlaceholder = asString(props.namePlaceholder, "Your name");
+      const emailLabel = asString(props.emailLabel, "Email");
+      const emailPlaceholder = asString(props.emailPlaceholder, "you@example.com");
+      const lockedEmailHint = asString(
+        props.lockedEmailHint,
+        "Email is locked to your logged-in account.",
+      );
+      const messageLabel = asString(props.messageLabel, "Notes");
+      const messagePlaceholder = asString(
+        props.messagePlaceholder,
+        "Tell us what you need help with",
+      );
+      const buttonBorderRadius = asString(props.buttonBorderRadius, "var(--radius-md)");
+      const buttonBorderColor = asString(props.buttonBorderColor, "var(--color-primary)");
+      const buttonBackground = asString(props.buttonBackground, "var(--color-primary)");
+      const buttonColor = asString(props.buttonColor, "var(--color-primary-foreground)");
+      const buttonPaddingX = asString(props.buttonPaddingX, "var(--space-md)");
+      const buttonPaddingY = asString(props.buttonPaddingY, "var(--space-sm)");
+      const overlayBackground = asString(props.overlayBackground, "rgba(2, 6, 23, 0.56)");
+      const modalBackground = asString(props.modalBackground, "var(--color-surface)");
+      const modalBorderColor = asString(props.modalBorderColor, "var(--color-border)");
+      const modalBorderRadius = asString(props.modalBorderRadius, "var(--radius-lg)");
+      const fieldBackground = asString(props.fieldBackground, "var(--color-background)");
+      const fieldColor = asString(props.fieldColor, "var(--color-foreground)");
+      const fieldBorderColor = asString(props.fieldBorderColor, "var(--color-border)");
+      const fieldBorderRadius = asString(props.fieldBorderRadius, "var(--radius-sm)");
+      const fieldPadding = asString(props.fieldPadding, "var(--space-sm)");
+
+      const fieldBaseStyle = styleValue({
+        width: "100%",
+        padding: fieldPadding,
+        border: `1px solid ${fieldBorderColor}`,
+        borderRadius: fieldBorderRadius,
+        background: fieldBackground,
+        color: fieldColor,
+        fontFamily: "var(--font-default)",
+        fontSize: "var(--text-sm)",
+      });
+
+      return wrap(
+        "div",
+        {
+          style: styleValue({
+            display: "inline-flex",
+            flexDirection: "column",
+            gap: "8px",
+          }),
+        },
+        `${wrap(
+          "button",
+          {
+            type: "button",
+            "data-contact-open": modalId,
+            style: styleValue({
+              border: `1px solid ${buttonBorderColor}`,
+              borderRadius: buttonBorderRadius,
+              background: buttonBackground,
+              color: buttonColor,
+              padding: `${buttonPaddingY} ${buttonPaddingX}`,
+              fontFamily: "var(--font-default)",
+              fontSize: "var(--text-sm)",
+              fontWeight: "600",
+              cursor: "pointer",
+            }),
+          },
+          escapeHtml(triggerText),
+        )}<div${renderAttributes({
+          id: modalId,
+          hidden: "hidden",
+          "data-contact-modal": "true",
+          style: styleValue({
+            position: "fixed",
+            inset: "0",
+            zIndex: "1200",
+            background: overlayBackground,
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }),
+        })}><div${renderAttributes({
+          role: "dialog",
+          "aria-modal": "true",
+          "aria-labelledby": titleId,
+          "aria-describedby": descriptionId,
+          style: styleValue({
+            width: "min(100%, 540px)",
+            maxHeight: "min(90vh, 760px)",
+            overflowY: "auto",
+            border: `1px solid ${modalBorderColor}`,
+            borderRadius: modalBorderRadius,
+            background: modalBackground,
+            padding: "20px",
+            boxShadow: "0 24px 48px -26px rgba(15, 23, 42, 0.65)",
+            fontFamily: "var(--font-default)",
+          }),
+        })}>${wrap(
+          "div",
+          {
+            style: styleValue({
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: "12px",
+            }),
+          },
+          `${wrap(
+            "div",
+            { style: styleValue({ minWidth: "0" }) },
+            `${wrap(
+              "h2",
+              {
+                id: titleId,
+                style: styleValue({
+                  margin: "0",
+                  fontSize: "var(--text-xl)",
+                  fontWeight: "700",
+                  color: "var(--color-foreground)",
+                  lineHeight: "1.2",
+                }),
+              },
+              escapeHtml(title),
+            )}${wrap(
+              "p",
+              {
+                id: descriptionId,
+                style: styleValue({
+                  margin: "8px 0 0 0",
+                  color: "var(--color-muted-foreground)",
+                  fontSize: "var(--text-sm)",
+                  lineHeight: "1.5",
+                }),
+              },
+              escapeHtml(description),
+            )}`,
+          )}${wrap(
+            "button",
+            {
+              type: "button",
+              "data-contact-close": modalId,
+              "aria-label": "Close contact form",
+              style: styleValue({
+                border: `1px solid ${modalBorderColor}`,
+                borderRadius: "9999px",
+                width: "28px",
+                height: "28px",
+                background: "var(--color-surface)",
+                color: "var(--color-muted-foreground)",
+                cursor: "pointer",
+                fontSize: "16px",
+                lineHeight: "1",
+              }),
+            },
+            "×",
+          )}`,
+        )}${wrap(
+          "form",
+          {
+            action,
+            method: "post",
+            "data-contact-form": "true",
+            style: styleValue({
+              marginTop: "16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }),
+          },
+          `${wrap(
+            "label",
+            {
+              style: styleValue({
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+              }),
+            },
+            `${wrap(
+              "span",
+              {
+                style: styleValue({
+                  fontSize: "12px",
+                  color: "var(--color-muted-foreground)",
+                }),
+              },
+              escapeHtml(nameLabel),
+            )}<input${renderAttributes({
+              type: "text",
+              name: "name",
+              placeholder: namePlaceholder,
+              required: "required",
+              style: fieldBaseStyle,
+            })}>`,
+          )}${wrap(
+            "label",
+            {
+              style: styleValue({
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+              }),
+            },
+            `${wrap(
+              "span",
+              {
+                style: styleValue({
+                  fontSize: "12px",
+                  color: "var(--color-muted-foreground)",
+                }),
+              },
+              escapeHtml(emailLabel),
+            )}<input${renderAttributes({
+              type: "email",
+              name: "email",
+              placeholder: emailPlaceholder,
+              required: "required",
+              "data-contact-email-input": "true",
+              style: fieldBaseStyle,
+            })}>${wrap(
+              "span",
+              {
+                hidden: "hidden",
+                "data-contact-email-lock-note": "true",
+                style: styleValue({
+                  fontSize: "11px",
+                  color: "var(--color-muted-foreground)",
+                }),
+              },
+              escapeHtml(lockedEmailHint),
+            )}`,
+          )}${wrap(
+            "label",
+            {
+              style: styleValue({
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+              }),
+            },
+            `${wrap(
+              "span",
+              {
+                style: styleValue({
+                  fontSize: "12px",
+                  color: "var(--color-muted-foreground)",
+                }),
+              },
+              escapeHtml(messageLabel),
+            )}${wrap(
+              "textarea",
+              {
+                name: "message",
+                rows: "6",
+                placeholder: messagePlaceholder,
+                required: "required",
+                style: styleValue({
+                  ...Object.fromEntries(
+                    fieldBaseStyle
+                      .split(";")
+                      .filter((entry) => entry.includes(":"))
+                      .map((entry) => {
+                        const [key, ...rest] = entry.split(":");
+                        return [key.trim(), rest.join(":").trim()];
+                      }),
+                  ),
+                  resize: "vertical",
+                }),
+              },
+              "",
+            )}`,
+          )}${wrap(
+            "div",
+            {
+              hidden: "hidden",
+              "data-contact-status": "true",
+              style: styleValue({
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-sm)",
+                padding: "8px 10px",
+                fontSize: "12px",
+                lineHeight: "1.4",
+              }),
+            },
+            "",
+          )}${wrap(
+            "div",
+            {
+              style: styleValue({
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+              }),
+            },
+            `${wrap(
+              "button",
+              {
+                type: "button",
+                "data-contact-close": modalId,
+                style: styleValue({
+                  border: `1px solid ${modalBorderColor}`,
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--color-surface)",
+                  color: "var(--color-foreground)",
+                  padding: "8px 12px",
+                  fontFamily: "var(--font-default)",
+                  fontSize: "var(--text-sm)",
+                  cursor: "pointer",
+                }),
+              },
+              escapeHtml(cancelText),
+            )}${wrap(
+              "button",
+              {
+                type: "submit",
+                "data-contact-submit": "true",
+                "data-submit-text": submitText,
+                "data-sending-text": "Sending...",
+                style: styleValue({
+                  border: `1px solid ${buttonBorderColor}`,
+                  borderRadius: "var(--radius-sm)",
+                  background: buttonBackground,
+                  color: buttonColor,
+                  padding: "8px 12px",
+                  fontFamily: "var(--font-default)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }),
+              },
+              escapeHtml(submitText),
+            )}`,
+          )}`,
+        )}</div></div>`,
+      );
+    }
     case "Name":
       return wrap(
         "label",
@@ -1567,6 +1920,211 @@ function renderNode(
   }
 }
 
+const CONTACT_MODAL_SCRIPT = `<script>
+(() => {
+  const modalNodes = Array.from(document.querySelectorAll('[data-contact-modal="true"]'));
+  if (modalNodes.length === 0) return;
+
+  function setBodyLock() {
+    const hasOpen = Boolean(document.querySelector('[data-contact-modal="true"][data-open="true"]'));
+    document.body.style.overflow = hasOpen ? 'hidden' : '';
+  }
+
+  function parseSessionEmail(payload) {
+    if (!payload || typeof payload !== 'object') return '';
+    const session = payload.session && typeof payload.session === 'object' ? payload.session : null;
+    if (!session) return '';
+    const nestedUser = session.user && typeof session.user === 'object' ? session.user : null;
+    if (nestedUser && typeof nestedUser.email === 'string') return nestedUser.email.trim().toLowerCase();
+    if (typeof session.email === 'string') return session.email.trim().toLowerCase();
+    return '';
+  }
+
+  async function prefillEmail(form) {
+    if (!(form instanceof HTMLFormElement)) return;
+    if (form.dataset.prefillChecked === '1') return;
+    form.dataset.prefillChecked = '1';
+
+    try {
+      const response = await fetch('/api/auth/session', {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      if (!response.ok) return;
+      const payload = await response.json().catch(() => null);
+      const email = parseSessionEmail(payload);
+      if (!email) return;
+
+      const emailInput = form.querySelector('[data-contact-email-input="true"]');
+      if (!(emailInput instanceof HTMLInputElement)) return;
+      emailInput.value = email;
+      emailInput.readOnly = true;
+      emailInput.dataset.lockedEmail = email;
+      emailInput.style.background = 'var(--color-muted)';
+      emailInput.style.color = 'var(--color-muted-foreground)';
+      emailInput.style.cursor = 'not-allowed';
+
+      const lockNote = form.querySelector('[data-contact-email-lock-note="true"]');
+      if (lockNote instanceof HTMLElement) lockNote.hidden = false;
+    } catch {
+      // Session prefill is optional.
+    }
+  }
+
+  function getModal(modalId) {
+    if (!modalId) return null;
+    const modal = document.getElementById(modalId);
+    if (!modal) return null;
+    if (modal.getAttribute('data-contact-modal') !== 'true') return null;
+    return modal;
+  }
+
+  function openModal(modalId) {
+    const modal = getModal(modalId);
+    if (!modal) return;
+    modal.hidden = false;
+    modal.style.display = 'flex';
+    modal.setAttribute('data-open', 'true');
+    setBodyLock();
+    const form = modal.querySelector('form[data-contact-form="true"]');
+    if (form) void prefillEmail(form);
+  }
+
+  function closeModal(modalId) {
+    const modal = getModal(modalId);
+    if (!modal) return;
+    modal.hidden = true;
+    modal.style.display = 'none';
+    modal.removeAttribute('data-open');
+    setBodyLock();
+  }
+
+  function setStatus(statusEl, kind, message) {
+    if (!(statusEl instanceof HTMLElement)) return;
+    statusEl.hidden = false;
+    statusEl.textContent = message;
+    if (kind === 'success') {
+      statusEl.style.borderColor = 'var(--color-success)';
+      statusEl.style.color = 'var(--color-success)';
+      statusEl.style.background = 'rgba(22, 163, 74, 0.10)';
+    } else {
+      statusEl.style.borderColor = 'var(--color-danger)';
+      statusEl.style.color = 'var(--color-danger)';
+      statusEl.style.background = 'rgba(220, 38, 38, 0.10)';
+    }
+  }
+
+  for (const modal of modalNodes) {
+    if (!(modal instanceof HTMLElement)) continue;
+    modal.hidden = true;
+    modal.style.display = 'none';
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const openButton = target.closest('[data-contact-open]');
+    if (openButton instanceof HTMLElement) {
+      const modalId = openButton.getAttribute('data-contact-open') || '';
+      openModal(modalId);
+      return;
+    }
+
+    const closeButton = target.closest('[data-contact-close]');
+    if (closeButton instanceof HTMLElement) {
+      const modalId = closeButton.getAttribute('data-contact-close') || '';
+      closeModal(modalId);
+      return;
+    }
+
+    const modalOverlay = target.closest('[data-contact-modal="true"]');
+    if (modalOverlay instanceof HTMLElement && target === modalOverlay) {
+      closeModal(modalOverlay.id);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const openModalNode = document.querySelector('[data-contact-modal="true"][data-open="true"]');
+    if (!(openModalNode instanceof HTMLElement)) return;
+    closeModal(openModalNode.id);
+  });
+
+  document.addEventListener('submit', async (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if (form.getAttribute('data-contact-form') !== 'true') return;
+    event.preventDefault();
+
+    const statusEl = form.querySelector('[data-contact-status="true"]');
+    if (statusEl instanceof HTMLElement) {
+      statusEl.hidden = true;
+      statusEl.textContent = '';
+    }
+
+    const submitBtn = form.querySelector('[data-contact-submit="true"]');
+    const idleSubmitText =
+      submitBtn instanceof HTMLButtonElement
+        ? submitBtn.getAttribute('data-submit-text') || submitBtn.textContent || 'Send'
+        : 'Send';
+    const sendingText =
+      submitBtn instanceof HTMLButtonElement
+        ? submitBtn.getAttribute('data-sending-text') || 'Sending...'
+        : 'Sending...';
+
+    if (submitBtn instanceof HTMLButtonElement) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = sendingText;
+    }
+
+    const action = form.getAttribute('action') || '/api/contact';
+    try {
+      const response = await fetch(action, {
+        method: 'POST',
+        body: new FormData(form),
+      });
+
+      const payload = await response.json().catch(() => null);
+      const responseMessage =
+        payload && typeof payload === 'object'
+          ? typeof payload.message === 'string'
+            ? payload.message
+            : typeof payload.error === 'string'
+              ? payload.error
+              : ''
+          : '';
+
+      if (response.ok && payload && typeof payload === 'object' && payload.ok === true) {
+        form.reset();
+        const emailInput = form.querySelector('[data-contact-email-input="true"]');
+        if (emailInput instanceof HTMLInputElement && emailInput.dataset.lockedEmail) {
+          emailInput.value = emailInput.dataset.lockedEmail;
+        }
+        setStatus(
+          statusEl,
+          'success',
+          responseMessage || 'Message sent. We will get back to you shortly.',
+        );
+      } else {
+        setStatus(
+          statusEl,
+          'error',
+          responseMessage || 'Could not send your message right now.',
+        );
+      }
+    } catch {
+      setStatus(statusEl, 'error', 'Network error while sending message.');
+    } finally {
+      if (submitBtn instanceof HTMLButtonElement) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = idleSubmitText;
+      }
+    }
+  });
+})();
+</script>`;
+
 export function buildStaticHtmlDocument(
   nodes: SerializedNodes,
   options: HtmlExportOptions = {},
@@ -1614,6 +2172,7 @@ img {
   <main>
 ${body}
   </main>
+  ${CONTACT_MODAL_SCRIPT}
 </body>
 </html>`;
 }

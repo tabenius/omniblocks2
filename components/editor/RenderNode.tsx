@@ -13,6 +13,7 @@ const BLOCK_ICONS: Record<string, string> = {
   Masonry: "⊟",
   LayoutBlock: "⊞",
   Author: "◉",
+  ContactForm: "✉",
 };
 
 export const RenderNode = ({ render }: { render: React.ReactElement }) => {

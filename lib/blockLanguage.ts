@@ -87,6 +87,11 @@ const TOKEN_MAP: Record<string, TokenMeta> = {
   Asset: { typeName: "Asset", displayName: "Asset", isCanvas: true },
   Quote: { typeName: "Quote", displayName: "Quote", isCanvas: true },
   Template: { typeName: "Template", displayName: "Template", isCanvas: false },
+  ContactForm: {
+    typeName: "ContactForm",
+    displayName: "ContactForm",
+    isCanvas: false,
+  },
 };
 
 function createNode(config: {

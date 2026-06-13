@@ -13,6 +13,7 @@ import {
   EmailEmail,
   TextareaEmail,
   ButtonEmail,
+  ContactFormEmail,
   LinkExtendedEmail,
 } from "./atoms";
 import {
@@ -44,6 +45,7 @@ export const emailResolver: Record<
   Email: EmailEmail,
   Textarea: TextareaEmail,
   Button: ButtonEmail,
+  ContactForm: ContactFormEmail,
   LinkExtended: LinkExtendedEmail,
   Container: ContainerEmail,
   TextBlock: TextBlockEmail,

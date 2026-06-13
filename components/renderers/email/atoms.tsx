@@ -15,6 +15,7 @@ import type { NameProps } from "@/components/user/Name";
 import type { EmailProps } from "@/components/user/Email";
 import type { TextareaProps } from "@/components/user/Textarea";
 import type { ButtonProps } from "@/components/user/Button";
+import type { ContactFormProps } from "@/components/user/ContactForm";
 import type { LinkExtendedProps, LinkExtendedOfferType } from "@/components/user/LinkExtended";
 
 const emailSize: Record<HeadingLevel, string> = {
@@ -241,6 +242,187 @@ export const ButtonEmail = (p: ButtonProps) => (
             }}
           >
             {encode(p.text ?? "Submit")}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+);
+
+export const ContactFormEmail = (p: ContactFormProps) => (
+  <table
+    role="presentation"
+    cellPadding={0}
+    cellSpacing={0}
+    border={0}
+    width="100%"
+    style={{ borderCollapse: "collapse" }}
+  >
+    <tbody>
+      <tr>
+        <td
+          style={{
+            border: `1px solid ${p.modalBorderColor ?? "#cbd5e1"}`,
+            borderRadius: p.modalBorderRadius ?? "12px",
+            background: p.modalBackground ?? "#ffffff",
+            padding: "16px",
+            fontFamily: "Arial, Helvetica, sans-serif",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "18px",
+              fontWeight: 700,
+              color: "#0f172a",
+              marginBottom: "8px",
+            }}
+          >
+            {encode(p.title ?? "Get in touch")}
+          </div>
+          <div
+            style={{
+              fontSize: "13px",
+              color: "#64748b",
+              marginBottom: "14px",
+              lineHeight: "1.5",
+            }}
+          >
+            {encode(p.description ?? "Send a short note and we will get back to you.")}
+          </div>
+
+          <table
+            role="presentation"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            width="100%"
+            style={{ borderCollapse: "collapse" }}
+          >
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    fontSize: "12px",
+                    color: "#64748b",
+                    paddingBottom: "6px",
+                    fontFamily: "Arial, Helvetica, sans-serif",
+                  }}
+                >
+                  {encode(p.nameLabel ?? "Name")}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    border: `1px solid ${p.fieldBorderColor ?? "#cbd5e1"}`,
+                    borderRadius: p.fieldBorderRadius ?? "6px",
+                    background: p.fieldBackground ?? "#ffffff",
+                    padding: "10px 12px",
+                    fontSize: "14px",
+                    color: "#94a3b8",
+                  }}
+                >
+                  {encode(p.namePlaceholder ?? "Your name")}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style={{ height: "10px", lineHeight: "10px" }}>&nbsp;</div>
+
+          <table
+            role="presentation"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            width="100%"
+            style={{ borderCollapse: "collapse" }}
+          >
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    fontSize: "12px",
+                    color: "#64748b",
+                    paddingBottom: "6px",
+                    fontFamily: "Arial, Helvetica, sans-serif",
+                  }}
+                >
+                  {encode(p.emailLabel ?? "Email")}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    border: `1px solid ${p.fieldBorderColor ?? "#cbd5e1"}`,
+                    borderRadius: p.fieldBorderRadius ?? "6px",
+                    background: "var(--color-muted, #f1f5f9)",
+                    padding: "10px 12px",
+                    fontSize: "14px",
+                    color: "var(--color-muted-foreground, #64748b)",
+                  }}
+                >
+                  {encode(p.emailPlaceholder ?? "you@example.com")}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style={{ height: "10px", lineHeight: "10px" }}>&nbsp;</div>
+
+          <table
+            role="presentation"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            width="100%"
+            style={{ borderCollapse: "collapse" }}
+          >
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    fontSize: "12px",
+                    color: "#64748b",
+                    paddingBottom: "6px",
+                    fontFamily: "Arial, Helvetica, sans-serif",
+                  }}
+                >
+                  {encode(p.messageLabel ?? "Notes")}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    border: `1px solid ${p.fieldBorderColor ?? "#cbd5e1"}`,
+                    borderRadius: p.fieldBorderRadius ?? "6px",
+                    background: p.fieldBackground ?? "#ffffff",
+                    padding: "10px 12px",
+                    fontSize: "14px",
+                    color: "#94a3b8",
+                    minHeight: "108px",
+                  }}
+                >
+                  {encode(p.messagePlaceholder ?? "Tell us what you need help with")}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style={{ height: "14px", lineHeight: "14px" }}>&nbsp;</div>
+          <span
+            style={{
+              display: "inline-block",
+              background: p.buttonBackground ?? "#2563eb",
+              color: p.buttonColor ?? "#ffffff",
+              border: `1px solid ${p.buttonBorderColor ?? "#2563eb"}`,
+              borderRadius: "8px",
+              padding: "8px 14px",
+              fontSize: "14px",
+              fontWeight: 600,
+            }}
+          >
+            {encode(p.submitText ?? "Send")}
           </span>
         </td>
       </tr>

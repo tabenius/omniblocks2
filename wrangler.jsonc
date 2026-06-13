@@ -22,6 +22,7 @@
     "RESEND_FROM": "xtas.nu@ragbaz.xyz",
     "RESEND_FROM_EMAIL": "xtas.nu@ragbaz.xyz"
   },
+  "observability": { "enabled": true },
   "r2_buckets": [
     {
       "binding": "R2_BUCKET",

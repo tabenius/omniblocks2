@@ -20,6 +20,7 @@ import { Template } from "@/components/user/Template";
 import { Event } from "@/components/user/Event";
 import { Video } from "@/components/user/Video";
 import { Form } from "@/components/user/Form";
+import { ContactForm } from "@/components/user/ContactForm";
 import { Name } from "@/components/user/Name";
 import { Email } from "@/components/user/Email";
 import { Textarea } from "@/components/user/Textarea";
@@ -128,6 +129,12 @@ export const Toolbox = () => {
         </Element>
       ) as unknown as React.ReactElement,
       parentHint: "Container, Hero, PrimaryBox",
+    },
+    {
+      label: "ContactForm",
+      group: "Interactive",
+      create: <ContactForm />,
+      parentHint: "Container, Hero, PrimaryBox, Text",
     },
     {
       label: "Author",

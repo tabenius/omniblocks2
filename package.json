@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "clean": "rm -rf .next .wrangler/state && find . -maxdepth 3 -name '*.tsbuildinfo' -delete",
     "lint": "NODE_OPTIONS=--max-old-space-size=4096 eslint",
     "test": "node --test --import tsx tests/**/*.test.ts",
     "cf:build": "opennextjs-cloudflare build",
